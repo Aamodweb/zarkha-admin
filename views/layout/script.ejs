@@ -1,0 +1,47 @@
+<script>
+$(document).ready(function () {
+  $('#adminUserForm').on('submit', function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    // Update CKEditor content to textarea
+    for (instance in CKEDITOR.instances) {
+      CKEDITOR.instances[instance].updateElement();
+    }
+
+    var form = $(this)[0]; // Get raw DOM element
+    var formData = new FormData(form); // Use FormData to handle file + data
+    var actionUrl = $(this).attr('action');
+
+    // Remove any previous errors
+    $('.is-invalid').removeClass('is-invalid');
+    $('.invalid-feedback').remove();
+
+    $.ajax({
+      url: actionUrl,
+      method: 'POST',
+      data: formData,
+      processData: false, // Required for FormData
+      contentType: false, // Required for FormData
+      success: function (response) {
+        if (response.status) {
+          alert(response.message);
+          window.location.href = response.redirect_url;
+        } else {
+          const errors = response.errors;
+          for (const field in errors) {
+            const input = $(`[name="${field}"]`);
+            input.addClass('is-invalid');
+            input.after(`<div class="invalid-feedback">${errors[field]}</div>`);
+          }
+        }
+      },
+      error: function (xhr) {
+        alert('Something went wrong. Please try again.');
+        console.log(xhr.responseText);
+      }
+    });
+  });
+});
+
+
+</script>

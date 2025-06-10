@@ -1,0 +1,73 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (category) { %>
+             <span>Edit category</span>
+        <% } else { %>
+             <span>Create category</span>
+        <% } %>
+      <a href="/category" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/category/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (category) { %>
+            <input type="hidden" name="id" value="<%= category.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="mb-3">
+              <label>Industry</label>
+              <select name="industry_id" class="form-control" required>
+                 <option value="">Select one</option>
+                <% industries.forEach(ind => { %>
+                  <option value="<%= ind._id %>"  <% if (category && String(category.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
+                <% }) %>
+              </select>
+            </div>
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= category && category.name ? category.name : '' %>"  placeholder="Enter category Name" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="image" class="form-label">Image</label>
+            <input type="file" class="form-control" id="image" name="image" value="">
+
+            <% if (category && category.image) { %>
+              <img src="<%= BASE_URL%>/uploads/category/<%= category.image %>" alt="Category Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+            <% }%>
+          </div>
+
+          <div class="col-md-6">
+            <label for="email" class="form-label">Description</label>
+            <textarea name="description" id="description" class="form-control"><%= category && category.description ? category.description : '' %></textarea>
+          </div>
+
+           <div class="col-md-6">
+              <label for="status" class="form-label">Status</label>
+              <select class="form-select" id="status" name="status" required>
+                  <option value="">Select status</option>
+                  <option value="active" <% if (category && category.status === 'active') { %> selected <% } %>>Active</option>
+                  <option value="inactive" <% if (category && category.status === 'inactive') { %> selected <% } %>>Inactive</option>
+              </select>
+          </div>
+        </div>
+
+        <div class="text-end">
+             <% if (category) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update category</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create category</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>

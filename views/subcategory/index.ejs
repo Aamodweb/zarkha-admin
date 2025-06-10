@@ -1,0 +1,79 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Subcategory List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search category..."
+              aria-label="Search category"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/subcategory/create" class="btn btn-add btn-primary">+ Add New Subcategory</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Category</th>
+                <th>Name</th>
+                <th>Image</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (subcategory && subcategory.length > 0) { %>
+                <% subcategory.forEach((sub, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= sub.category_id ? sub.category_id.name : '' %></td>
+                    <td><%= sub.name %></td>
+                    <td><img src="<%= BASE_URL%>/uploads/subcategory/<%= sub.image %>" alt="" width="50px"></td>
+                    <td><%= sub.description %></td>
+                    <td>
+                       <% if (sub.status === 'active') { %>
+                         <span class="status active"><%= sub.status %></span>
+                        <% } else { %>
+                         <span class="status inactive"><%= sub.status %></span> 
+                        <% } %>
+                    </td>
+                    <td>
+                        <a href="<%= BASE_URL %>/subcategory/edit/<%= sub.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/subcategory/delete/<%= sub.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="7">No data found</td></tr>
+                <% } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

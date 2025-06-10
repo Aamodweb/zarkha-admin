@@ -1,0 +1,83 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Manufacture List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search manufacture..."
+              aria-label="Search manufacture"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/manufacture/create" class="btn btn-add btn-primary">+ Add New Manufacture</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Industry</th>
+                <th>Name</th>
+                <th>Image</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (manufacture_list && manufacture_list.length > 0) { %>
+                <% manufacture_list.forEach((manufacture, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= manufacture.industry_id ? manufacture.industry_id.name : '' %></td>
+                    <td><%= manufacture.name %></td>
+                    <td><img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.image %>" alt="" width="50px"></td>
+                    <td><%= manufacture.address %></td>
+                    <td><%= manufacture.contact_email %></td>
+                    <td><%= manufacture.mobile %></td>
+                    <td>
+                      <% if (manufacture.status === 'active') { %>
+                        <span class="status active"><%= manufacture.status %></span>
+                        <% } else { %>
+                        <span class="status inactive"><%= manufacture.status %></span> 
+                        <% } %>
+                    </td>
+                    <td>
+                        <a href="<%= BASE_URL %>/manufacture/edit/<%= manufacture.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/manufacture/delete/<%= manufacture.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="9">No data found</td></tr>
+                <% } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,182 @@
+<%- include('../layout/header') %>
+<style>
+    .product_details {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product_details h4, 
+.product_details h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.product_details p {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.product_details .badge {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.product_details .badge.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.product_details .badge.inactive {
+  background-color: #dc3545;
+  color: white;
+}
+
+.product_details img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.product_details .list-group-item {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.product_details .btn {
+  margin-right: 10px;
+}
+
+.product_description {
+  max-height: 250px;         /* Set maximum height */
+  overflow-y: auto;          /* Enable vertical scroll if needed */
+  background: #f8f9fa;       /* Light background for readability */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.product_description ul,
+.product_description ol {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.product_description p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.product_description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product_description::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.product_description::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+</style>
+<div class="content">
+   <div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Product Details</h4>
+        </div>
+        <div class="card-body product_details">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Name: <%= product.name %></h4>
+                    <p><strong>Industry:</strong> <%= product.industry_id ? product.industry_id.name : 'N/A' %></p>
+                    <p><strong>Category:</strong> <%= product.category_id ? product.category_id.name : 'N/A' %></p>
+                    <p><strong>Subcategory:</strong> <%= product.subcategory_id ? product.subcategory_id.name : 'N/A' %></p>
+                    <p><strong>Brands:</strong> <%= product.brand_id ? product.brand_id.name : 'N/A' %></p>
+                    <p><strong>Description:</strong></p>
+                    <div class="product_description">
+                    <%- product.description || 'No description available' %>
+                    </div>
+
+                    <p><strong>Status:</strong> 
+                        <% if (product.status === 'active') { %>
+                            <span class="badge active"><%= product.status %></span>
+                        <% } else { %>
+                            <span class="badge inactive"><%= product.status %></span>
+                        <% } %>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <% if (product.color_images && product.color_images.length > 0) { %>
+                        <h5>Images by Color:</h5>
+                        <% product.color_images.forEach(colorGroup => { %>
+                        <div class="mb-3">
+                            <strong><%= colorGroup.color %></strong><br>
+                            <% if (colorGroup.images && colorGroup.images.length > 0) { %>
+                            <% colorGroup.images.forEach(img => { %>
+                                <img src="<%= BASE_URL %>/uploads/product-image/<%= img %>" 
+                                    alt="<%= colorGroup.color %>" 
+                                    class="img-fluid mb-2 me-2" 
+                                    style="max-width: 100px; border: 1px solid #ccc; border-radius: 5px;" />
+                            <% }) %>
+                            <% } else { %>
+                            <p>No images for <%= colorGroup.color %></p>
+                            <% } %>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p>No color images available</p>
+                    <% } %>
+                </div>
+
+
+            </div>
+
+            <% if (product.variants && product.variants.length > 0) { %>
+                <h4>Variants</h4>
+                <ul class="list-group">
+                    <% product.variants.forEach(variant => { %>
+                        <li class="list-group-item">
+                            <strong><%= variant.attribute_name %></strong> - <%= variant.attribute_value %><br />
+                            <strong>Product Price (INR)</strong> - <%= variant.product_price %><br />
+                            <strong>Discount Price (INR)</strong> - <%= variant.discount_price %><br />
+                            <strong>Product Sku</strong> - <%= variant.product_sku %>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <p>No variants available for this product.</p>
+            <% } %>
+
+             <hr>
+            <div class="row">
+                 <div class="col-md-6">
+                        <p><strong>Return Policy:</strong> <%= product.return_allowed ? product.return_allowed : 'N/A' %></p>
+                        <p><strong>Return Policy Notes:</strong> <%= product.return_notes ? product.return_notes : 'N/A' %></p>
+                        <p><strong>SEO Title:</strong> <%= product.seo_title ? product.seo_title : 'N/A' %></p>
+                        <p><strong>SEO Description:</strong> <%= product.seo_description ? product.seo_description : 'N/A' %></p>
+                        <p><strong>Product Tags / Keywords:</strong> <%= product.product_tags ? product.product_tags : 'N/A' %></p>
+                 </div>
+            </div>
+
+
+            <div class="mt-4">
+                <a href="<%= BASE_URL %>/product/edit/<%= product.id %>" class="btn btn-primary">Edit Product</a>
+                <a href="<%= BASE_URL %>/product" class="btn btn-secondary">Back to Products</a>
+            </div>
+   </div>
+</div>
+
+<%- include('../layout/footer') %>

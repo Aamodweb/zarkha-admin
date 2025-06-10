@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="<%= ASSET_URL %>/image/favicon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+   <link rel="stylesheet" href="<%= ASSET_URL %>/css/style.css">
+   <link rel="stylesheet" href="<%= ASSET_URL %>/css/responsive.css">
+   <link rel="stylesheet" href="<%= ASSET_URL %>/css/admintable.css">
+   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  </head>
+<body>
+
+  <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="logo">
+        <div class="d-flex align-items-center">
+          <div class="icon-box">
+            <!-- SVG here -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+                <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              </svg>
+          </div>
+          <span>Zarkha Admin</span>
+        </div>
+      </div>
+  <div class="mobile-close-btn" onclick="toggleSidebar()">✕</div>
+  <hr>
+
+  <ul class="menu">
+    <li class="<%= currentRoute === '/dashboard' ? 'active' : '' %>">
+      <a href="/dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+    </li>
+
+    <li class="<%= currentRoute.startsWith('/admin_user') ? 'active' : '' %>">
+      <a href="/admin_user"><i class="fas fa-users"></i> <span>Admin Users</span></a>
+    </li>
+
+    <li class="<%= currentRoute.startsWith('/industry') ? 'active' : '' %>">
+      <a href="/industry"><i class="fas fa-industry"></i> <span>Industry</span></a>
+    </li>
+
+    <!-- Product Management Section -->
+    <li class="menu-label">Product Management</li>
+
+    <li class="<%= currentRoute.startsWith('/category') ? 'active' : '' %>">
+      <a href="/category"><i class="fas fa-th-large"></i> <span>Category</span></a>
+    </li>
+
+    <li class="<%= currentRoute.startsWith('/subcategory') ? 'active' : '' %>">
+      <a href="/subcategory"><i class="fas fa-list-alt"></i> <span>SubCategory</span></a>
+    </li>
+
+    <li class="<%= currentRoute.startsWith('/brands') ? 'active' : '' %>">
+      <a href="/brands"><i class="fas fa-tags"></i> <span>Brands</span></a>
+    </li>
+
+    <li class="<%= currentRoute.startsWith('/units') ? 'active' : '' %>">
+      <a href="/units"><i class="fas fa-balance-scale"></i> <span>Units</span></a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/product') ? 'active' : '' %>">
+      <a href="/product"><i class="fas fa-box"></i> <span>Products</span></a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/manufacture') ? 'active' : '' %>">
+      <a href="/manufacture"><i class="fas fa-box"></i> <span>Manufacture</span></a>
+    </li>
+  </ul>
+</div>
+
+  <!-- Main Area -->
+  <div class="main">
+      <!-- Header -->
+      <div class="header flex items-center justify-between px-4 py-3 bg-gray-100 shadow-md">
+        
+        <div class="flex items-center gap-4">
+          <span class="toggle-btn cursor-pointer text-2xl" onclick="toggleSidebar()">☰</span>
+          <h1 class="gradient-text">Zarkha Super Admin</h1>
+        </div>
+        
+        <div class="profile relative cursor-pointer" onclick="toggleDropdown()">
+          <div class="profile-icon w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold select-none">A</div>
+          <div class="dropdown absolute right-0 mt-2 w-28 bg-white border rounded shadow-md hidden" id="profileDropdown">
+            <a href="<%= BASE_URL %>/logout" class="block px-4 py-2 hover:bg-gray-100">Logout</a>
+          </div>
+        </div>
+
+      </div>

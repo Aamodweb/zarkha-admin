@@ -1,0 +1,110 @@
+<%- include('layout/header') %>
+
+<div class="content">
+  <div class="dashboard-cards">
+    <div class="card">
+      <h3>Users</h3>
+      <p class="number">1,245</p>
+      <small>Active users</small>
+    </div>
+    <div class="card">
+      <h3>Sales</h3>
+      <p class="number">$38,450</p>
+      <small>This month</small>
+    </div>
+    <div class="card">
+      <h3>Orders</h3>
+      <p class="number">345</p>
+      <small>Pending</small>
+    </div>
+    <div class="card">
+      <h3>Support Tickets</h3>
+      <p class="number">12</p>
+      <small>Open tickets</small>
+    </div>
+  </div>
+
+  <div class="charts-section">
+    <div class="chart-card">
+      <h4>Sales Overview</h4>
+      <canvas id="salesChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>User Activity</h4>
+      <canvas id="userActivityChart"></canvas>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <h3>Recent User Signups</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th><th>Email</th><th>Signup Date</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jane Doe</td><td>jane@example.com</td><td>2025-05-25</td><td><span class="status active">Active</span></td>
+        </tr>
+        <tr>
+          <td>John Smith</td><td>john@example.com</td><td>2025-05-24</td><td><span class="status inactive">Inactive</span></td>
+        </tr>
+        <tr>
+          <td>Mary Johnson</td><td>maryj@example.com</td><td>2025-05-23</td><td><span class="status active">Active</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('layout/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Sales Chart
+  const ctxSales = document.getElementById('salesChart').getContext('2d');
+  const salesChart = new Chart(ctxSales, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Sales',
+        data: [12000, 19000, 14000, 22000, 28000, 35000],
+        backgroundColor: 'rgba(255, 135, 28, 0.2)',  // yellow-ish
+        borderColor: '#FF871C',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  // User Activity Chart
+  const ctxUser = document.getElementById('userActivityChart').getContext('2d');
+  const userActivityChart = new Chart(ctxUser, {
+    type: 'bar',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'Active Users',
+        data: [150, 200, 170, 220, 210, 190, 230],
+        backgroundColor: '#A988F9'  // voilate
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>

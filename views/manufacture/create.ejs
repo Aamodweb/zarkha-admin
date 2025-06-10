@@ -1,0 +1,89 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (manufacture) { %>
+             <span>Edit Manufacture</span>
+        <% } else { %>
+             <span>Create Manufacture</span>
+        <% } %>
+      <a href="/manufacture" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/manufacture/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (manufacture) { %>
+            <input type="hidden" name="id" value="<%= manufacture.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="mb-3">
+              <label>Industry</label>
+              <select name="industry_id" class="form-control" required>
+                 <option value="">Select one</option>
+                <% industries.forEach(ind => { %>
+                  <option value="<%= ind._id %>"  <% if (manufacture && String(manufacture.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
+                <% }) %>
+              </select>
+            </div>
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= manufacture && manufacture.name ? manufacture.name : '' %>"  placeholder="Enter manufacture Name" required>
+          </div>
+          <div class="col-md-6">
+            <label for="Email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="contact_email" name="contact_email" value="<%= manufacture && manufacture.contact_email ? manufacture.contact_email : '' %>"  placeholder="Enter manufacture Contact Email" required>
+          </div>
+          <div class="col-md-6">
+            <label for="name" class="form-label">Mobile</label>
+            <input type="text" class="form-control" id="mobile" name="mobile" value="<%= manufacture && manufacture.mobile ? manufacture.mobile : '' %>"  placeholder="Enter manufacture Mobile" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="image" class="form-label">Image</label>
+            <input type="file" class="form-control" id="image" name="image" value="">
+
+            <% if (manufacture && manufacture.image) { %>
+              <img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.image %>" alt="Manufacture Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+            <% }%>
+          </div>
+
+          <div class="col-md-6">
+            <label for="email" class="form-label">Address</label>
+            <textarea name="address" id="address" class="form-control"><%= manufacture && manufacture.address ? manufacture.address : '' %></textarea>
+          </div>
+
+           <div class="col-md-6">
+              <label for="status" class="form-label">Status</label>
+              <select class="form-select" id="status" name="status" required>
+                  <option value="">Select status</option>
+                  <option value="active" <% if (manufacture && manufacture.status === 'active') { %> selected <% } %>>Active</option>
+                  <option value="inactive" <% if (manufacture && manufacture.status === 'inactive') { %> selected <% } %>>Inactive</option>
+              </select>
+          </div>
+        </div>
+
+        <div class="text-end">
+             <% if (manufacture) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Manufacture</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Manufacture</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+  document.getElementById('mobile').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, ''); // remove non-digits
+    if (this.value.length > 10) {
+      this.value = this.value.slice(0, 10); // max 10 digits
+    }
+  });
+</script>
+
+
+<%- include('../layout/footer') %>

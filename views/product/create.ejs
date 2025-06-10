@@ -1,0 +1,588 @@
+<%- include('../layout/header') %>
+<style>
+  .image-box{
+      display: flex;
+      flex-direction: column;
+  }
+  .image_upperbox{
+    gap:8px;
+  }
+</style>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (product) { %>
+             <span>Edit Product</span>
+        <% } else { %>
+             <span>Create product</span>
+        <% } %>
+      <a href="/product" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/product/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (product) { %>
+            <input type="hidden" name="id" value="<%= product.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+              <label for="industry" class="form-label">Industry</label>
+              <select name="industry_id" id="industryDropdown" class="form-control" required>
+                 <option value="">Select one</option>
+                <% industries.forEach(ind => { %>
+                  <option value="<%= ind._id %>"  <% if (product && String(product.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
+                <% }) %>
+              </select>
+            </div>
+             <div class="col-md-4 mb-2">
+              <label for="category" class="form-label">Category</label>
+              <select name="category_id" id="categoryDropdown" class="form-control" data-selected="<%= product ? product.category_id : '' %>" required>
+                 <option value="">Select one</option>
+                
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label for="subcategory" class="form-label">SubCategory</label>
+              <!-- Subcategory Dropdown -->
+              <select name="subcategory_id" id="subcategoryDropdown" class="form-control" data-selected="<%= product ? product.subcategory_id : '' %>">
+                <option value="">Select one</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label for="brands_id" class="form-label">Brands</label>
+                <!-- Brand Dropdown (if needed instead) -->
+                <select name="brand_id" id="brandDropdown" class="form-control" data-selected="<%= product ? product.brand_id : '' %>">
+                  <option value="">Select one</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-2">
+              <label for="name" class="form-label">Product Name</label>
+              <input type="text" class="form-control" id="product_name" name="product_name" value="<%= product && product.name ? product.name : '' %>"  placeholder="Enter Product Name" required>
+            </div>
+
+            <div class="col-md-12 mb-2">
+              <label for="email" class="form-label">Product Description</label>
+              <textarea name="description" id="description" class="form-control"><%= product && product.description ? product.description : '' %></textarea>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Do you want to upload images color-wise?</label><br>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="image_type" id="colorWise" value="color" <% if (product) { %> <% if (product.image_type === 'color') { %> checked <% }}else{ %> checked <% } %>>
+                <label class="form-check-label" for="colorWise">Yes (Color-wise)</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="image_type" id="general" value="general" <% if (product) { %> <% if (product.image_type === 'general') { %> checked <% }}else{ %> general <% } %>>
+                <label class="form-check-label" for="general">No (Same image for all)</label>
+              </div>
+            </div>
+
+
+            <!-- General Image Upload -->
+            <div class="mb-4 image-upload-section general-upload d-none">
+              <label class="form-label">Upload General Images</label>
+              <input type="file" name="product_images" class="form-control" multiple accept="image/*">
+                <% if (product && product.color_images && product.color_images.length > 0 && product.image_type === 'general') { %>
+                    <% product.color_images.forEach(function(colorItem, colorIndex) { %>
+                      <div class="my-3">
+                        <h5><%= colorItem.color %> Images</h5>
+                        <div class="row">
+                          <% if (colorItem.images && colorItem.images.length > 0) { %>
+                            <% colorItem.images.forEach(function(image, imageIndex) { %>
+                                <div class="col-md-2 text-center mb-3 image-box" data-color-index="<%= colorIndex %>" data-image-index="<%= imageIndex %>">
+                                  <img src="/uploads/product-image/<%= image %>" class="img-fluid rounded" style="height: 120px; object-fit: cover;" alt="Color Image">
+
+                                  <button type="button" class="btn btn-danger btn-sm mt-2 delete-image-btn"
+                                          data-product-id="<%= product._id %>"
+                                          data-color-index="<%= colorIndex %>"
+                                          data-image-index="<%= imageIndex %>"
+                                          data-image="<%= image %>">
+                                    Delete
+                                  </button>
+                                </div>
+                            <% }) %>
+                          <% } %>
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } %>
+            </div>
+            <!-- Color-wise Image Upload -->
+            <div class="mb-4 image-upload-section color-upload">
+              <label class="form-label">Upload Color-wise Images</label>
+              <div id="colorImageWrapper">
+                <!-- Dynamic color blocks will be added here -->
+                <% if (product && product.color_images && product.color_images.length > 0 && product.image_type === 'color') { %>
+                    <% product.color_images.forEach(function(colorItem, colorIndex) { %>
+                      <div class="row mb-2" id="row-${colorIndex}">
+                        <!-- <div class="col-md-4">
+                          <input type="color" name="color_name[]" value="<%= colorItem && colorItem.color ? colorItem.color : '' %>" class="form-control">
+                        </div> -->
+                        <div class="col-md-12 d-flex image_upperbox">
+                          <!-- <input type="file" name="product_images_${colorIndex}[]" class="form-control" multiple required> -->
+                            <% if (colorItem.images && colorItem.images.length > 0) { %>
+                              <% colorItem.images.forEach(function(image, imageIndex) { %>
+                                <div class="col-md-2 text-center mb-3 image-box" data-color-index="<%= colorIndex %>" data-image-index="<%= imageIndex %>">
+                                  <img src="/uploads/product-image/<%= image %>" class="img-fluid rounded" style="height: 50px; object-fit: cover;" alt="Color Image">
+                                  <button type="button" class="btn btn-danger btn-sm mt-2 delete-image-btn"
+                                          data-product-id="<%= product._id %>"
+                                          data-color-index="<%= colorIndex %>"
+                                          data-image-index="<%= imageIndex %>"
+                                          data-image="<%= image %>">Delete</button>
+                                </div>
+                              <% }) %>
+                            <% } %>
+
+                        </div>
+                        <!-- <div class="col-md-2">
+                          <button type="button" class="btn btn-danger btn-sm" onclick="$('#row-${colorIndex}').remove()">Remove</button>
+                        </div> -->
+                        <input type="hidden" name="image_group_ids[]" value="${colorIndex}">
+                      </div>
+                    <% }) %>
+                <% } %>
+              </div>
+              <button type="button" class="btn btn-sm btn-primary" onclick="addColorImageRow()">+ Add Color</button>
+            </div>
+
+
+
+
+           <!-- multipal vairent wise product upload functionality -->
+
+            <div class="mb-3">
+              <label class="form-label d-block">Does this product have variants?</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="has_variants" id="variantYes" value="yes" <% if (product) { %> <% if (product.has_variants === 'yes') { %> checked <% }}else{ %> checked <% } %>>
+                <label class="form-check-label" for="variantYes">Yes</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="has_variants" id="variantNo" value="no" <% if (product) { %> <% if (product.has_variants === 'no') { %> checked <% }}else{ %> checked <% } %>>
+                <label class="form-check-label" for="variantNo">No</label>
+              </div>
+            </div>
+
+
+           <div class="mb-4" id="variantSection">
+              <label class="form-label">Product Variants</label>
+              <div id="variantContainer">
+                <!-- Variant rows will be dynamically added -->
+              </div>
+              <button type="button" class="btn btn-success btn-sm mt-2" onclick="addVariantRow()">+ Add Variant</button>
+            </div>
+            
+                  <% if (product && product.variants && product.variants.length > 0 && product.has_variants === 'no') { %>
+                    <% product.variants.forEach(function(variantItem, variantIndex) { %>
+
+                      <div class="row mb-4 d-none" id="singleProductFields">
+                        <div class="col-md-4 mb-3">
+                          <label class="form-label">Product SKU</label>
+                          <input type="text" class="form-control" name="variant_skus[]" value="<%= variantItem && variantItem.product_sku ? variantItem.product_sku : '' %>" placeholder="Leave empty to auto-generate">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                          <label class="form-label">Product Price</label>
+                          <input type="number" step="0.01" class="form-control" name="variant_prices[]" value="<%= variantItem && variantItem.product_price ? variantItem.product_price : '' %>" placeholder="Enter price">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                          <label class="form-label">Discount Price</label>
+                          <input type="number" step="0.01" class="form-control" value="<%= variantItem && variantItem.discount_price ? variantItem.discount_price : '' %>" name="variant_discount_prices" placeholder="Enter discount price">
+                        </div>
+                      </div>
+                     <% }) %>
+                  <% } %>
+
+              <div class="mb-3">
+                <label class="form-label">Return Policy</label>
+                <select name="return_allowed" class="form-control" required>
+                  <option value="yes" <% if (product) { %> <% if (product.return_allowed === 'yes') { %> selected <% }}else{ %> selected <% } %>>Allowed (within 7 days)</option>
+                  <option value="no" <% if (product) { %> <% if (product.return_allowed === 'no') { %> selected <% }}else{ %> selected <% } %>>Not Allowed</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Return Policy Notes (Optional)</label>
+                <textarea name="return_notes" class="form-control" rows="3" placeholder="E.g., Product must be unused and in original packaging."><%= product && product.return_notes ? product.return_notes : '' %></textarea>
+              </div>
+
+              <div class="row mb-4">
+                  <div class="col-md-4">
+                      <label for="seo_title" class="form-label">SEO Title (Optional)</label>
+                       <input type="text" name="seo_title" class="form-control" value="<%= product && product.seo_title ? product.seo_title : '' %>" placeholder="SEO Title (e.g., Stylish Cotton T-Shirt for Men)">
+                  </div>
+                  <div class="col-md-4">
+                      <label for="seo_description" class="form-label">SEO Description (Optional)</label>
+                       <textarea name="seo_description" class="form-control" placeholder="Enter a brief SEO description for better Google visibility."><%= product && product.seo_description ? product.seo_description : '' %></textarea>
+                  </div>
+                  <div class="col-md-4">
+                      <label for="product_tags" class="form-label">Product Tags / Keywords (Optional)</label>
+                        <input type="text" name="product_tags" class="form-control" 
+                              value="<%= (typeof product === 'object' && product && product.product_tags) 
+                                        ? (Array.isArray(product.product_tags) 
+                                            ? product.product_tags.join(', ') 
+                                            : product.product_tags) 
+                                        : '' %>" 
+                              placeholder="e.g., t-shirt, cotton, summer, men's wear">
+                        <small>Comma-separated tags for better searchability.</small>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="">Select status</option>
+                        <option value="active" <% if (product && product.status === 'active') { %> selected <% } %>>Active</option>
+                        <option value="inactive" <% if (product && product.status === 'inactive') { %> selected <% } %>>Inactive</option>
+                    </select>
+                  </div>
+              </div>
+        </div>
+
+        <div class="text-end">
+             <% if (product) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update product</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create product</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>
+<script>
+   CKEDITOR.replace('description',{
+    versionCheck: false
+   });
+function addColorImageRow() {
+  const rowId = Date.now();
+  const html = `
+    <div class="row mb-2" id="row-${rowId}">
+      <div class="col-md-4">
+        <input type="color" name="color_name[]" class="form-control" value="#ffffff">
+      </div>
+      <div class="col-md-6">
+        <input type="file" name="product_images_${rowId}[]" class="form-control" multiple required>
+      </div>
+      <div class="col-md-2">
+        <button type="button" class="btn btn-danger btn-sm" onclick="$('#row-${rowId}').remove()">Remove</button>
+      </div>
+      <input type="hidden" name="image_group_ids[]" value="${rowId}">
+    </div>
+
+  `;
+  $('#colorImageWrapper').append(html);
+}
+  function removeColorImageRow(button) {
+    $(button).closest('.color-image-row').remove();
+  }
+</script>
+
+<script>
+  function addVariantRow() {
+    const html = `
+      <div class="row align-items-end mb-2 variant-row">
+        <div class="col-md-2">
+          <label>Select Attribute</label>
+            <select id="variantType" class="form-select" name="variant_types[]" required>
+              <option value="">-- Select Variant --</option>
+              <option value="Size">Size</option>
+              <option value="Color">Color</option>
+              <option value="Material">Material</option>
+              <option value="Weight">Weight</option>
+              <option value="Capacity">Capacity</option>
+              <option value="Flavor">Flavor</option>
+              <option value="Style">Style</option>
+              <option value="Pack Size">Pack Size</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+          <label>Attribute Value</label>
+          <input type="text" class="form-control" name="attribute_value[]" placeholder="Enter Value" required>
+        </div>
+        <div class="col-md-2">
+          <label>SKU</label>
+          <input type="text" class="form-control" name="variant_skus[]" placeholder="Leave empty to auto-generate" required>
+        </div>
+        <div class="col-md-2">
+          <label>Discount Price</label>
+          <input type="number" class="form-control" name="variant_prices[]" step="0.01" placeholder="e.g., 999.00" required>
+        </div>
+        <div class="col-md-2">
+          <label>Price</label>
+          <input type="number" class="form-control" name="variant_discount_prices[]" step="0.01" placeholder="e.g., 999.00" required>
+        </div>
+        <div class="col-md-2">
+          <label>Stock</label>
+          <input type="number" class="form-control" name="variant_stocks[]" placeholder="e.g., 100" required>
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-danger btn-sm mt-4" onclick="removeVariantRow(this)">Remove</button>
+        </div>
+      </div>`;
+    $('#variantContainer').append(html);
+  }
+
+  function removeVariantRow(button) {
+    $(button).closest('.variant-row').remove();
+  }
+</script>
+<script>
+  $(document).ready(function () {
+  function loadCategories(industryId, selectedCategoryId = '') {
+    const actionUrl = '/filter-category-get';
+
+    $('#categoryDropdown').html('<option value="">Select one</option>');
+
+    if (!industryId) return;
+
+    $.ajax({
+      url: actionUrl,
+      method: 'GET',
+      data: { industry_id: industryId },
+      success: function (response) {
+        if (response.data.length > 0) {
+          response.data.forEach(cat => {
+            const selected = (cat._id === selectedCategoryId) ? 'selected' : '';
+            $('#categoryDropdown').append(`<option value="${cat._id}" ${selected}>${cat.name}</option>`);
+          });
+        }
+      },
+      error: function () {
+        alert('Failed to load categories.');
+      }
+    });
+  }
+
+  // When industry dropdown changes
+  $('#industryDropdown').on('change', function () {
+    const industryId = $(this).val();
+    loadCategories(industryId);
+  });
+
+  // --- EDIT MODE SUPPORT ---
+  // Trigger change if pre-selected industry value exists
+  const preSelectedIndustry = $('#industryDropdown').val();
+  const preSelectedCategory = $('#categoryDropdown').data('selected'); // Set this in HTML if available
+
+  if (preSelectedIndustry) {
+    loadCategories(preSelectedIndustry, preSelectedCategory);
+  }
+
+
+  // Load Subcategories or Brands by Category
+    function loadSubcategoriesOrBrands(categoryId, selectedId = '', type = 'subcategory') {
+      const url = type === 'subcategory' ? '/filter-subcategory-get' : '/filter-brand-get';
+      const targetDropdown = type === 'subcategory' ? '#subcategoryDropdown' : '#brandDropdown';
+
+      $(targetDropdown).html('<option value="">Select one</option>');
+      if (!categoryId) return;
+
+      $.ajax({
+        url: url,
+        method: 'GET',
+        data: { category_id: categoryId },
+        success: function (response) {
+          if (response.data && response.data.length > 0) {
+            response.data.forEach(item => {
+              const selected = (item._id === selectedId) ? 'selected' : '';
+              $(targetDropdown).append(`<option value="${item._id}" ${selected}>${item.name}</option>`);
+            });
+          }
+        },
+        error: function () {
+          alert(`Failed to load ${type}s.`);
+        }
+      });
+    }
+
+
+    // Category change triggers subcategory or brand loading
+    $('#categoryDropdown').on('change', function () {
+      const categoryId = $(this).val();
+      loadSubcategoriesOrBrands(categoryId, '', 'subcategory'); // change to 'brand' if needed
+      loadSubcategoriesOrBrands(categoryId, '', 'brand'); // change to 'brand' if needed
+    });
+
+    // --- Edit Mode Trigger on Page Load ---
+    const preCategory = $('#categoryDropdown').data('selected');
+    const preSubcategory = $('#subcategoryDropdown').data('selected');
+    const preBrand = $('#brandDropdown').data('selected');
+    // const preBrand = $('#brandDropdown').data('selected'); // if using brand
+
+   
+
+    if (preCategory) {
+      loadSubcategoriesOrBrands(preCategory, preSubcategory, 'subcategory'); // or 'brand'
+      loadSubcategoriesOrBrands(preCategory, preBrand, 'brand'); // or 'brand'
+    }
+});
+$(document).ready(function () {
+  $('input[name="image_type"]').on('change', function () {
+    if ($(this).val() === 'color') {
+      $('#colorImageWrapper').show();
+      $('#generalImageWrapper').hide();
+    } else {
+      $('#colorImageWrapper').hide();
+      $('#generalImageWrapper').show();
+    }
+  });
+
+  // Trigger on page load (edit case)
+  $('input[name="image_type"]:checked').trigger('change');
+});
+ $(document).ready(function () {
+    $('input[name="has_variants"]').on('change', function () {
+      if ($(this).val() === 'yes') {
+        $('#variantSection').show();
+      } else {
+        $('#variantSection').hide();
+      }
+    });
+
+    // Optional: Trigger change for edit page
+    $('input[name="has_variants"]:checked').trigger('change');
+  });
+
+
+$(document).ready(function () {
+  // Open file picker on box click
+  $('#generalImageDropArea').on('click', function () {
+    $('#generalImages').trigger('click');
+  });
+
+  // Handle file preview
+  $('#generalImages').on('change', function (e) {
+    let files = e.target.files;
+    $('#generalImagePreview').empty();
+
+    Array.from(files).forEach((file, index) => {
+      let reader = new FileReader();
+      reader.onload = function (event) {
+        let img = `<div class="image-box">
+                    <img src="${event.target.result}" alt="Preview">
+                    <button type="button" class="remove-btn" onclick="$(this).parent().remove()">×</button>
+                  </div>`;
+        $('#generalImagePreview').append(img);
+      }
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Drag and drop support
+  const dropArea = $('#generalImageDropArea');
+
+  dropArea.on('dragover', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.css('background-color', '#f1f1f1');
+  });
+
+  dropArea.on('dragleave', function () {
+    dropArea.css('background-color', '');
+  });
+
+  dropArea.on('drop', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.css('background-color', '');
+    $('#generalImages')[0].files = e.originalEvent.dataTransfer.files;
+    $('#generalImages').trigger('change');
+  });
+});
+
+
+
+</script>
+<script>
+$(document).ready(function () {
+  function toggleImageSections() {
+  const selected = $('input[name="image_type"]:checked').val();
+
+  if (selected === 'color') {
+    $('.color-upload').removeClass('d-none');
+    $('.general-upload').addClass('d-none');
+  } else {
+    $('.general-upload').removeClass('d-none');
+    $('.color-upload').addClass('d-none');
+  }
+}
+// Only call once
+toggleImageSections();
+
+// Then bind
+$('input[name="image_type"]').on('change', toggleImageSections);
+
+});
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const variantYes = document.getElementById("variantYes");
+    const variantNo = document.getElementById("variantNo");
+    const variantSection = document.getElementById("variantSection");
+    const singleFields = document.getElementById("singleProductFields");
+
+    function toggleVariantSections() {
+      if (variantYes.checked) {
+        variantSection.classList.remove("d-none");
+        singleFields.classList.add("d-none");
+      } else {
+        variantSection.classList.add("d-none");
+        singleFields.classList.remove("d-none");
+      }
+    }
+
+    // Initial check
+    toggleVariantSections();
+
+    // Add event listeners
+    variantYes.addEventListener("change", toggleVariantSections);
+    variantNo.addEventListener("change", toggleVariantSections);
+  });
+</script>
+<script>
+  document.querySelectorAll('.delete-image-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!confirm("Are you sure you want to delete this image?")) return;
+
+      const productId = btn.getAttribute('data-product-id');
+      const colorIndex = btn.getAttribute('data-color-index');
+      const imageIndex = btn.getAttribute('data-image-index');
+      const image = btn.getAttribute('data-image');
+
+      fetch('/product/image/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId,
+          colorIndex,
+          imageIndex,
+          image
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          btn.closest('.image-box').remove();
+          alert('Image deleted successfully');
+        } else {
+          alert('Failed to delete image');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error deleting image');
+      });
+    });
+  });
+</script>
+
+
+
+
+

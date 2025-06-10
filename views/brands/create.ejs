@@ -1,0 +1,127 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (brands) { %>
+             <span>Edit Brands</span>
+        <% } else { %>
+             <span>Create Brands</span>
+        <% } %>
+      <a href="/brands" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/brands/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (brands) { %>
+            <input type="hidden" name="id" value="<%= brands.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <!-- Industry Dropdown -->
+            <div class="col-md-6">
+              <label for="Industry" class="form-label">Industry</label>
+              <select name="industry_id" id="industryDropdown" class="form-control" required>
+                <option value="">Select one</option>
+                <% industries.forEach(ind => { %>
+                  <option value="<%= ind._id %>" <% if (brands && String(brands.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <!-- Category Dropdown -->
+            <div class="col-md-6">
+              <label for="category" class="form-label">Category</label>
+              <select name="category_id" id="categoryDropdown" class="form-control" data-selected="<%= brands ? brands.category_id : '' %>" required>
+                <option value="">Select one</option>
+                
+              </select>
+            </div>
+
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= brands && brands.name ? brands.name : '' %>"  placeholder="Enter brands Name" required>
+          </div>
+          <div class="col-md-6">
+            <label for="image" class="form-label">Image</label>
+            <input type="file" class="form-control" id="image" name="image" value="">
+
+            <% if (brands && brands.image) { %>
+              <img src="<%= BASE_URL%>/uploads/brands/<%= brands.image %>" alt="Brands Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+            <% }%>
+          </div>
+
+          <div class="col-md-6">
+            <label for="email" class="form-label">Description</label>
+            <textarea name="description" id="description" class="form-control"><%= brands && brands.description ? brands.description : '' %></textarea>
+          </div>
+
+           <div class="col-md-6">
+              <label for="status" class="form-label">Status</label>
+              <select class="form-select" id="status" name="status" required>
+                  <option value="">Select status</option>
+                  <option value="active" <% if (brands && brands.status === 'active') { %> selected <% } %>>Active</option>
+                  <option value="inactive" <% if (brands && brands.status === 'inactive') { %> selected <% } %>>Inactive</option>
+              </select>
+          </div>
+        </div>
+
+        <div class="text-end">
+             <% if (brands) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Brands</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Brands</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>
+<script>
+  $(document).ready(function () {
+  function loadCategories(industryId, selectedCategoryId = '') {
+    const actionUrl = '/filter-category-get';
+
+    $('#categoryDropdown').html('<option value="">Select one</option>');
+
+    if (!industryId) return;
+
+    $.ajax({
+      url: actionUrl,
+      method: 'GET',
+      data: { industry_id: industryId },
+      success: function (response) {
+        if (response.data.length > 0) {
+          response.data.forEach(cat => {
+            const selected = (cat._id === selectedCategoryId) ? 'selected' : '';
+            $('#categoryDropdown').append(`<option value="${cat._id}" ${selected}>${cat.name}</option>`);
+          });
+        }
+      },
+      error: function () {
+        alert('Failed to load categories.');
+      }
+    });
+  }
+
+  // When industry dropdown changes
+  $('#industryDropdown').on('change', function () {
+    const industryId = $(this).val();
+    loadCategories(industryId);
+  });
+
+  // --- EDIT MODE SUPPORT ---
+  // Trigger change if pre-selected industry value exists
+  const preSelectedIndustry = $('#industryDropdown').val();
+  const preSelectedCategory = $('#categoryDropdown').data('selected'); // Set this in HTML if available
+
+  if (preSelectedIndustry) {
+    loadCategories(preSelectedIndustry, preSelectedCategory);
+  }
+});
+
+</script>

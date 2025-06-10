@@ -1,0 +1,81 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Brands List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search brands..."
+              aria-label="Search brands"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/brands/create" class="btn btn-add btn-primary">+ Add New Brands</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+              <tr>
+                  <th>#</th>
+                  <th>Industry</th>
+                  <th>Category</th>
+                  <th>Name</th>
+                  <th>Image</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Action</th>
+              </tr>
+          </thead>
+          <tbody>
+              <% if (brands && brands.length > 0) { %>
+                  <% brands.forEach((brand, index) => { %>
+                      <tr>
+                      <td><%= index + 1 %></td>
+                      <td><%= brand.industry_id.name %></td>
+                      <td><%= brand.category_id.name %></td>
+                      <td><%= brand.name %></td>
+                      <td><img src="<%= BASE_URL%>/uploads/brands/<%= brand.image %>" alt="" width="50px"></td>
+                      <td><%= brand.description %></td>
+                      <td>
+                        <% if (brand.status === 'active') { %>
+                          <span class="status active"><%= brand.status %></span>
+                          <% } else { %>
+                          <span class="status inactive"><%= brand.status %></span> 
+                          <% } %>
+                      </td>
+                      <td>
+                          <a href="<%= BASE_URL %>/brands/edit/<%= brand.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                          <a href="<%= BASE_URL %>/brands/delete/<%= brand.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                      </td>
+                      </tr>
+                  <% }) %>
+                  <% } else { %>
+                  <tr><td class="text-center" colspan="6">No data found</td></tr>
+                  <% } %>
+              </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

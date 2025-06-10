@@ -1,0 +1,71 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (user) { %>
+             <span>Edit Admin User</span>
+        <% } else { %>
+             <span>Create Admin User</span>
+        <% } %>
+      <a href="/admin_user" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/admin_user/store" id="adminUserForm" method="POST">
+          <% if (user) { %>
+            <input type="hidden" name="id" value="<%= user.id %>">
+            <% } %>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="name" class="form-label">User Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= user && user.username ? user.username : '' %>"  placeholder="Enter User Name" required>
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" value="<%= user && user.email ? user.email : '' %>" placeholder="Enter email" required>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+            <% if (!user) { %>
+          <div class="col-md-4">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Create password" required>
+          </div>
+          <% } %>
+          <div class="col-md-4">
+            <label for="role" class="form-label">Role</label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="">Select role</option>
+              <option value="admin" selected>Admin</option>
+            </select>
+          </div>
+        <div class="col-md-4">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+                <option value="">Select status</option>
+                <option value="active" <% if (user && user.status === 'active') { %> selected <% } %>>Active</option>
+                <option value="inactive" <% if (user && user.status === 'inactive') { %> selected <% } %>>Inactive</option>
+            </select>
+        </div>
+
+        </div>
+
+
+        <div class="text-end">
+             <% if (user) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update User</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create User</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>

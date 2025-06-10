@@ -1,0 +1,88 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Admin User List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search users..."
+              aria-label="Search users"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/admin_user/create" class="btn btn-add btn-primary">+ Add New User</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (users && users.length > 0) { %>
+              <% users.forEach((user, index) => { %>
+                <tr>
+                  <td data-label="#"> <%= index + 1 %> </td>
+                  <td data-label="Username"> <%= user.username %> </td>
+                  <td data-label="Email"> <%= user.email %> </td>
+                  <td data-label="Role"> <%= user.role %> </td>
+                  <td data-label="Status">
+                    <% if (user.status === 'active') { %>
+                      <span class="status active"><%= user.status %></span>
+                    <% } else { %>
+                      <span class="status inactive"><%= user.status %></span>
+                    <% } %>
+                  </td>
+                  <td data-label="Action">
+                    <% if (index != 0) { %>
+                      <a href="<%= BASE_URL %>/admin_user/edit/<%= user.id %>" class="action-btn edit" title="Edit">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a href="<%= BASE_URL %>/admin_user/delete/<%= user.id %>" class="action-btn delete" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                      </a>
+                    <% }else{ %>
+
+                           <span>No Permissions</span>
+                      <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td class="text-center" colspan="6">No users found</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>
