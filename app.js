@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
+const { exec } = require('child_process');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 
@@ -61,5 +62,22 @@ app.set('view engine', 'ejs');
 const authRoutes = require('./routes/authRoutes');
 app.use('/', authRoutes);
 
+app.post('/webhook', (req, res) => {
+  console.log('GitHub webhook received! Starting deployment...');
+
+  // Immediately respond to GitHub to avoid 502
+  res.status(200).send('Deployment started');
+
+  // Then run the script AFTER response
+  exec('/var/www/zarkha/deploy.sh', (error, stdout, stderr) => {
+    if (error) {
+      console.error('Deploy script error:', error);
+      return;
+    }
+    console.log('Deploy script output:', stdout);
+    if (stderr) console.error(stderr);
+  });
+});
+
 // Start server
-app.listen(3005, () => console.log('Server started on http://localhost:3005'));
+app.listen(3005, () => console.log('Server started on http://127.0.0.1:3005'));
