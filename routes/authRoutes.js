@@ -20,7 +20,9 @@ const brandsController = require('../controllers/BrandsController');
 const unitsController = require('../controllers/UnitsController');
 const productController = require('../controllers/ProductController');
 const manufactureController = require('../controllers/ManufactureController');
-
+const stateController = require('../controllers/StateController');
+const cityController = require('../controllers/CityController');
+const countryController = require('../controllers/CountriesController');
 
 // Routes
 router.get('/',redirectIfAuthenticated, authController.login);
@@ -120,9 +122,45 @@ const manufactureUpload = multer({ storage: manufactureStorage });
 // manufacture module
 router.get('/manufacture',authMiddleware, manufactureController.List);
 router.get('/manufacture/create',authMiddleware, manufactureController.Create);
-router.post('/manufacture/store',authMiddleware, manufactureUpload.array('image'),manufactureController.Store);
+router.post('/manufacture/store',authMiddleware,   manufactureUpload.fields([
+    { name: 'image', maxCount: 1 },                    
+    { name: 'business_registration_certificate', maxCount: 1 },
+    { name: 'cancelled_cheque_passbook', maxCount: 1 }
+  ]),manufactureController.Store);
 router.get('/manufacture/edit/:id',authMiddleware, manufactureController.Edit);
+router.get('/manufacture/view/:id',authMiddleware, manufactureController.View);
 router.get('/manufacture/delete/:id',authMiddleware, manufactureController.Delete);
+
+// country  module 
+router.get('/country',authMiddleware, countryController.List);
+router.get('/country/create',authMiddleware, countryController.Create);
+router.post('/country/store',authMiddleware, upload.none(),countryController.Store);
+router.get('/country/edit/:id',authMiddleware, countryController.Edit);
+router.get('/country/delete/:id',authMiddleware, countryController.Delete);
+
+
+// brands module
+const csvUploadPath = 'uploads/';
+const  csvStorage = setupStorage(csvUploadPath);
+const csvUpload = multer({ storage: csvStorage });
+
+
+// state  module 
+router.get('/state',authMiddleware, stateController.List);
+router.get('/state/create',authMiddleware, stateController.Create);
+router.post('/state/store',authMiddleware, upload.none(),stateController.Store);
+router.get('/state/edit/:id',authMiddleware, stateController.Edit);
+router.get('/state/delete/:id',authMiddleware, stateController.Delete);
+router.post('/state/import-xlsx',authMiddleware,csvUpload.single('csvFile'), stateController.ImportXLSX);
+
+// city Module create
+router.get('/city',authMiddleware, cityController.List);
+router.get('/city/create',authMiddleware, cityController.Create);
+router.post('/city/store',authMiddleware, upload.none(),cityController.Store);
+router.get('/city/edit/:id',authMiddleware, cityController.Edit);
+router.get('/city/delete/:id',authMiddleware, cityController.Delete);
+router.get('/get-cities',authMiddleware, cityController.GetCity);
+router.post('/city/import-xlsx',authMiddleware,csvUpload.single('csvFile'), cityController.ImportXLSX);
 
 
 router.get('/logout', (req, res) => {

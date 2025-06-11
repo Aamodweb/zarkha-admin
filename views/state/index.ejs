@@ -1,0 +1,129 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">State List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search state..."
+              aria-label="Search state"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/state/create" class="btn btn-add btn-primary">+ Add New State</a>
+           </div>
+        </div>
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#importCSVModal">
+          <i class="fas fa-file-upload"></i> Import<br>
+        </button>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Country</th>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (state_list && state_list.length > 0) { %>
+                <% state_list.forEach((state, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= state.country_id ? state.country_id.name : '' %></td>
+                    <td><%= state.name %></td>
+                    <td><%= state.code %></td>
+                    <td>
+                        <a href="<%= BASE_URL %>/state/edit/<%= state.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/state/delete/<%= state.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="5">No data found</td></tr>
+                <% } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importCSVModal" tabindex="-1" aria-labelledby="importCSVLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="importCSVForm" enctype="multipart/form-data">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="importCSVLabel">Import States via Excel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+           <div class="mb-2 text-end">
+              <a href="<%= BASE_URL %>/uploads/sample/state-sample.xlsx" class="btn btn-sm btn-outline-primary" download>
+                <i class="fas fa-download"></i> Download Sample
+              </a>
+            </div>
+          <div class="mb-3">
+            <label for="csvFile" class="form-label">Select Excel File <span style="color:red">( only .xlsx file allow)</span> </label>
+            <input class="form-control" type="file" id="csvFile" name="csvFile" accept=".xlsx" required />
+          </div>
+          <div id="importResult" class="text-success small mt-2"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Upload</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<%- include('../layout/footer') %>
+<script>
+  $('#importCSVForm').on('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: '/state/import-xlsx',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      beforeSend: () => {
+        $('#importResult').removeClass('text-danger').text('Uploading...');
+      },
+      success: function (res) {
+        $('#importResult').text('State imported successfully!');
+        setTimeout(() => {
+          $('#importCSVModal').modal('hide');
+          location.reload();
+        }, 1000);
+      },
+      error: function (err) {
+        $('#importResult').addClass('text-danger').text('Failed to import CSV.');
+      }
+    });
+  });
+</script>

@@ -4,6 +4,31 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Then your CKEditor and custom script -->
 <script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="<%= ASSET_URL %>/js/snackbar.js"  type="text/javascript"></script>
+<script>
+$(document).on('click', '.has-sub > a', function (e) {
+  e.preventDefault();
+  const $parent = $(this).parent();
+
+  const isRouteActive = $parent.find('li.active').length > 0;
+
+  // Only toggle 'active' class if no subitem is already active
+  if (!isRouteActive) {
+    $parent.toggleClass('active');
+  }
+
+  // Always toggle the submenu display (show/hide)
+  $parent.find('.submenu').first().slideToggle(200);
+});
+
+// Show submenu by default if active
+$(document).ready(function () {
+  $('.has-sub.active .submenu').show();
+});
+
+</script>
+
 
   <script>
  function toggleSidebar() {
@@ -26,15 +51,13 @@
     
   </script>
   <script>
-$(document).ready(function () {
-  $('.submenu-toggle').on('click', function () {
-    $(this).next('.submenu').slideToggle();
-    $(this).find('.toggle-icon').toggleClass('rotate');
-  });
-});
-
-
-</script>
+    $(document).ready(function () {
+      $('.submenu-toggle').on('click', function () {
+        $(this).next('.submenu').slideToggle();
+        $(this).find('.toggle-icon').toggleClass('rotate');
+      });
+    });
+  </script>
 
 
   <%- include('script') %>

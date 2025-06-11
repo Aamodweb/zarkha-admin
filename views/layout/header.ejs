@@ -9,9 +9,17 @@
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/style.css">
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/responsive.css">
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/admintable.css">
+   <link rel="stylesheet" href="<%= ASSET_URL %>/css/snackbar.css">
    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+   <style>
+    .mandatory{
+      color:red;
+    }
 
+
+   </style>
   </head>
 <body>
 
@@ -31,48 +39,55 @@
       </div>
   <div class="mobile-close-btn" onclick="toggleSidebar()">✕</div>
   <hr>
+<ul class="menu">
+  <li class="<%= currentRoute === '/dashboard' ? 'active' : '' %>">
+    <a href="/dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+  </li>
 
-  <ul class="menu">
-    <li class="<%= currentRoute === '/dashboard' ? 'active' : '' %>">
-      <a href="/dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
-    </li>
+  <li class="<%= currentRoute.startsWith('/admin_user') ? 'active' : '' %>">
+    <a href="/admin_user"><i class="fas fa-users"></i> <span>Admin Users</span></a>
+  </li>
 
-    <li class="<%= currentRoute.startsWith('/admin_user') ? 'active' : '' %>">
-      <a href="/admin_user"><i class="fas fa-users"></i> <span>Admin Users</span></a>
-    </li>
+  <!-- Product Management Section -->
+  <!-- <li class="menu-label">Product Management</li> -->
 
-    <li class="<%= currentRoute.startsWith('/industry') ? 'active' : '' %>">
-      <a href="/industry"><i class="fas fa-industry"></i> <span>Industry</span></a>
-    </li>
+  <li class="<%= currentRoute.startsWith('/product') ? 'active' : '' %>">
+    <a href="/product"><i class="fas fa-box"></i> <span>Product Management</span></a>
+  </li>
 
-    <!-- Product Management Section -->
-    <li class="menu-label">Product Management</li>
+  <li class="<%= currentRoute.startsWith('/manufacture') ? 'active' : '' %>">
+    <a href="/manufacture"><i class="fas fa-box"></i> <span>Manufacture</span></a>
+  </li>
 
-    <li class="<%= currentRoute.startsWith('/category') ? 'active' : '' %>">
-      <a href="/category"><i class="fas fa-th-large"></i> <span>Category</span></a>
-    </li>
+  <!-- Common Setting Dropdown -->
+  <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') ? 'active' : '' %>">
+    <a href="#"><span> <i class="fas fa-cogs"></i>  Common Setting</span>  <i class="fas fa-chevron-down submenu-toggle-icon"></i></a>
+    <ul class="submenu">
+      <li class="<%= currentRoute.startsWith('/industry') ? 'active' : '' %>">
+        <a href="/industry"><i class="fas fa-industry"></i> Industry</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/units') ? 'active' : '' %>">
+        <a href="/units"><i class="fas fa-balance-scale"></i> Units</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/brands') ? 'active' : '' %>">
+        <a href="/brands"><i class="fas fa-tags"></i>  Brands</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/subcategory') ? 'active' : '' %>">
+        <a href="/subcategory"><i class="fas fa-list-alt"></i> SubCategory</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/category') ? 'active' : '' %>">
+        <a href="/category"><i class="fas fa-th-large"></i> Category</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/state') ? 'active' : '' %>">
+        <a href="/state"><i class="fas fa-flag"></i> State</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/city') ? 'active' : '' %>">
+        <a href="/city"><i class="fas fa-city"></i> City</a>
+      </li>
+    </ul>
+  </li>
+</ul>
 
-    <li class="<%= currentRoute.startsWith('/subcategory') ? 'active' : '' %>">
-      <a href="/subcategory"><i class="fas fa-list-alt"></i> <span>SubCategory</span></a>
-    </li>
-
-    <li class="<%= currentRoute.startsWith('/brands') ? 'active' : '' %>">
-      <a href="/brands"><i class="fas fa-tags"></i> <span>Brands</span></a>
-    </li>
-
-    <li class="<%= currentRoute.startsWith('/units') ? 'active' : '' %>">
-      <a href="/units"><i class="fas fa-balance-scale"></i> <span>Units</span></a>
-    </li>
-    <li class="<%= currentRoute.startsWith('/product') ? 'active' : '' %>">
-      <a href="/product"><i class="fas fa-box"></i> <span>Products</span></a>
-    </li>
-    <li class="<%= currentRoute.startsWith('/manufacture') ? 'active' : '' %>">
-      <a href="/manufacture"><i class="fas fa-box"></i> <span>Manufacture</span></a>
-    </li>
-    <li class="<%= currentRoute.startsWith('/manufacture') ? 'active' : '' %>">
-      <a href="/manufacture"><i class="fas fa-box"></i> <span>Partner</span></a>
-    </li>
-  </ul>
 </div>
 
   <!-- Main Area -->

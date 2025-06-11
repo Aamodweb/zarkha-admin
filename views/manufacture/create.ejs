@@ -16,51 +16,159 @@
           <% if (manufacture) { %>
             <input type="hidden" name="id" value="<%= manufacture.id %>">
             <% } %>
-        <div class="row mb-3">
-            <div class="mb-3">
-              <label>Industry</label>
-              <select name="industry_id" class="form-control" required>
-                 <option value="">Select one</option>
-                <% industries.forEach(ind => { %>
-                  <option value="<%= ind._id %>"  <% if (manufacture && String(manufacture.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
-                <% }) %>
+          <div class="row mb-3">
+            <div class="col-md-3 mb-2">
+              <label for="name" class="form-label">Manufacturer Name <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="name" name="name" value="<%= manufacture && manufacture.name ? manufacture.name : '' %>"  placeholder="Enter manufacture Name" data-required="Name">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="name" class="form-label">Owner/Proprietor Name <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="owner_proprietor_name" name="owner_proprietor_name" value="<%= manufacture && manufacture.owner_proprietor_name ? manufacture.owner_proprietor_name : '' %>"  placeholder="Enter Owner/Proprietor Name" data-required="Owner/Proprietor Name">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="name" class="form-label">Business Type <span class="mandatory">*</span></label>
+              <select class="form-select" id="business_type" name="business_type" data-required="Business Type">
+                <option value="">Select Business Type</option>
+                <option value="Proprietorship" <% if (manufacture && manufacture.business_type === 'Proprietorship') { %> selected <% } %>>Proprietorship</option>
+                <option value="Partnership" <% if (manufacture && manufacture.business_type === 'Partnership') { %> selected <% } %>>Partnership</option>
+                <option value="Pvt Ltd" <% if (manufacture && manufacture.business_type === 'Pvt Ltd') { %> selected <% } %>>Pvt Ltd</option>
+                <option value="LLP" <% if (manufacture && manufacture.business_type === 'LLP') { %> selected <% } %>>LLP</option>
+                <option value="Other" <% if (manufacture && manufacture.business_type === 'Other') { %> selected <% } %>>Other</option>
               </select>
             </div>
-          <div class="col-md-6">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" value="<%= manufacture && manufacture.name ? manufacture.name : '' %>"  placeholder="Enter manufacture Name" required>
-          </div>
-          <div class="col-md-6">
-            <label for="Email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="contact_email" name="contact_email" value="<%= manufacture && manufacture.contact_email ? manufacture.contact_email : '' %>"  placeholder="Enter manufacture Contact Email" required>
-          </div>
-          <div class="col-md-6">
-            <label for="name" class="form-label">Mobile</label>
-            <input type="text" class="form-control" id="mobile" name="mobile" value="<%= manufacture && manufacture.mobile ? manufacture.mobile : '' %>"  placeholder="Enter manufacture Mobile" required>
-          </div>
+            <div class="col-md-3 mb-2">
+              <label for="name" class="form-label">Business Name <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="business_name" name="business_name" value="<%= manufacture && manufacture.business_name ? manufacture.business_name : '' %>"  placeholder="Enter Business Name" data-required="Business Name">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="mobile" class="form-label">Mobile Number <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="mobile" name="mobile" value="<%= manufacture && manufacture.mobile ? manufacture.mobile : '' %>"  placeholder="Enter manufacture Mobile Number" data-required="Mobile Number">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="name" class="form-label">WhatsApp Number <span class="mandatory">(optional)</span></label>
+              <input type="text" class="form-control" id="whatsapp_mobile" name="whatsapp_mobile" value="<%= manufacture && manufacture.whatsapp_mobile ? manufacture.whatsapp_mobile : '' %>"  placeholder="Enter manufacture Whatsapp Mobile" >
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="Email" class="form-label">Email ID <span class="mandatory">*</span></label>
+              <input type="email" class="form-control" id="contact_email" name="contact_email" value="<%= manufacture && manufacture.contact_email ? manufacture.contact_email : '' %>"  placeholder="Enter manufacture Contact Email" data-required="Email ID">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="Website" class="form-label">Website <span class="mandatory">(optional)</span></label>
+              <input type="text" class="form-control" id="website" name="website" value="<%= manufacture && manufacture.website ? manufacture.website : '' %>"  placeholder="Enter manufacture Website">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="Website" class="form-label">GST Number <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="gst_number" name="gst_number" value="<%= manufacture && manufacture.gst_number ? manufacture.gst_number : '' %>"  placeholder="Enter GST Number" data-required="GST Number">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label for="Website" class="form-label">PAN Number <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="pan_number" name="pan_number" value="<%= manufacture && manufacture.pan_number ? manufacture.pan_number : '' %>"  placeholder="Enter PAN Number" data-required="PAN Number">
+            </div>
+            <div class="col-md-6 mb-2">
+              <label for="Website" class="form-label">MSME Registration Number <span class="mandatory">(optional)</span></label>
+              <input type="text" class="form-control" id="msme_regisration" name="msme_regisration" value="<%= manufacture && manufacture.msme_regisration ? manufacture.msme_regisration : '' %>"  placeholder="Enter MSME Number" data-required="MSME Registration Number">
+            </div>
 
-          <div class="col-md-6">
-            <label for="image" class="form-label">Image</label>
-            <input type="file" class="form-control" id="image" name="image" value="">
+            <div class="col-md-6 mb-2">
+              <label for="image" class="form-label">Business Registration Certificate <span class="mandatory">(optional)</span></label>
+              <input type="file" class="form-control" id="business_registration_certificate" name="business_registration_certificate" value="" >
 
-            <% if (manufacture && manufacture.image) { %>
-              <img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.image %>" alt="Manufacture Image" class="img-thumbnail mt-2" style="max-width: 150px;">
-            <% }%>
-          </div>
+              <% if (manufacture && manufacture.business_registration_certificate) { %>
+                <img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.business_registration_certificate %>" alt="Business Registration Certificate Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+              <% }%>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label for="image" class="form-label">Profile Image <span class="mandatory">(optional)</span></label>
+              <input type="file" class="form-control" id="image" name="image" value="" >
 
-          <div class="col-md-6">
-            <label for="email" class="form-label">Address</label>
-            <textarea name="address" id="address" class="form-control"><%= manufacture && manufacture.address ? manufacture.address : '' %></textarea>
+              <% if (manufacture && manufacture.image) { %>
+                <img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.image %>" alt="Manufacture Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+              <% }%>
+            </div>
           </div>
+             <div class="row mb-3">
+                <h3>Address Details</h3>
+                <div class="col-md-4 mb-2">
+                  <label for="name" class="form-label">State <span class="mandatory">*</span></label>
+                    <select class="form-select" id="state_id" name="state_id" data-required="State">
+                        <option value="">Select state</option>
+                        <% if (states) { states.forEach(stat => { %>
+                            <option value="<%= stat._id %>"  <% if (manufacture && String(manufacture.state_id) === String(stat._id)) { %> selected <% } %>><%= stat.name %></option>
+                        <% }) } %>
+                    </select>
+                </div>
 
-           <div class="col-md-6">
-              <label for="status" class="form-label">Status</label>
-              <select class="form-select" id="status" name="status" required>
-                  <option value="">Select status</option>
-                  <option value="active" <% if (manufacture && manufacture.status === 'active') { %> selected <% } %>>Active</option>
-                  <option value="inactive" <% if (manufacture && manufacture.status === 'inactive') { %> selected <% } %>>Inactive</option>
-              </select>
+                <div class="col-md-4 mb-2">
+                  <label for="name" class="form-label">City <span class="mandatory">*</span></label>
+                  <select class="form-select" id="city" name="city_id" data-required="City" data-selected="<%= manufacture && manufacture.city_id ? manufacture.city_id : '' %>">
+                      <option value="">Select city</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mb-2">
+                  <label for="name" class="form-label">Pincode <span class="mandatory">*</span></label>
+                  <input type="text" class="form-control" id="pincode" name="pincode" value="<%= manufacture && manufacture.pincode ? manufacture.pincode : '' %>"  placeholder="Enter manufacture Pincode" data-required="Pincode">
+                </div>
+
+                <div class="col-md-12 mb-2">
+                  <label for="email" class="form-label">Address <span class="mandatory">*</span></label>
+                  <textarea name="address" id="address" class="form-control" data-required="Factory Address"><%= manufacture && manufacture.address ? manufacture.address : '' %></textarea>
+                </div>
+             </div>
+        <div class="row mb-3">
+           <h3>Bank Details</h3>
+          <div class="col-md-3 mb-2">
+            <label for="name" class="form-label">Account Holder Name <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="<%= manufacture && manufacture.account_holder_name ? manufacture.account_holder_name : '' %>"  placeholder="Enter Account Holder Name" data-required="Account Holder Name">
           </div>
+          <div class="col-md-3 mb-2">
+            <label for="name" class="form-label">Bank Account Number <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" value="<%= manufacture && manufacture.bank_account_number ? manufacture.bank_account_number : '' %>"  placeholder="Enter Bank Account Number" data-required="Bank Account Number">
+          </div>
+          <div class="col-md-3 mb-2">
+            <label for="name" class="form-label">IFSC Code <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="bank_ifsc_code" name="bank_ifsc_code" value="<%= manufacture && manufacture.bank_ifsc_code ? manufacture.bank_ifsc_code : '' %>"  placeholder="Enter Bank IFSC Code" data-required="IFSC Code">
+          </div>
+          <div class="col-md-3 mb-2">
+            <label for="Bank Name" class="form-label">Bank Name <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="bank_name" name="bank_name" value="<%= manufacture && manufacture.bank_name ? manufacture.bank_name : '' %>"  placeholder="Enter Bank Name" data-required="Bank Name">
+          </div>
+          <div class="col-md-3 mb-2">
+            <label for="Cancelled Cheque / Passbook" class="form-label">Cancelled Cheque / Passbook<span class="mandatory">*</span></label>
+            <input type="file" class="form-control" id="cancelled_cheque_passbook" name="cancelled_cheque_passbook" value=""  placeholder="Enter Cancelled Cheque / Passbook" <% if (!manufacture) { %> data-required="Cancelled Cheque / Passbook" <% } %>>
+            <% if (manufacture && manufacture.cancelled_cheque_passbook) { %>
+                <img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.cancelled_cheque_passbook %>" alt="Manufacture Cancelled Cheque / Passbook" class="img-thumbnail mt-2" style="max-width: 150px;">
+              <% }%>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label for="UPI ID" class="form-label">UPI ID <span class="mandatory">(Optional)</span></label>
+            <input type="text" class="form-control" id="upi_id" name="upi_id" value="<%= manufacture && manufacture.upi_id ? manufacture.upi_id : '' %>"  placeholder="Enter UPI ID">
+          </div>
+          <div class="col-md-3 mb-2">
+            <label for="status" class="form-label">Status <span class="mandatory">*</span></label>
+            <select class="form-select" id="status" name="status" data-required="Status">
+                <option value="">Select status</option>
+                <option value="active" <% if (manufacture && manufacture.status === 'active') { %> selected <% } %>>Active</option>
+                <option value="inactive" <% if (manufacture && manufacture.status === 'inactive') { %> selected <% } %>>Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="row mb-3">
+           <h3>Features Details</h3>
+            <div class="col-md-12 mb-3">
+                <label>Industry <span class="mandatory">*</span></label>
+                <select name="industry_id[]" class="form-control select2-industry" multiple="multiple" data-required="Industry">
+                  <% industries.forEach(ind => { %>
+                    <option value="<%= ind._id %>"
+                      <% if (manufacture && Array.isArray(manufacture.industry_id) && manufacture.industry_id.some(id => String(id) === String(ind._id))) { %>
+                        selected
+                      <% } %>>
+                      <%= ind.name %>
+                    </option>
+                  <% }) %>
+                </select>
+
+              </div>
         </div>
 
         <div class="text-end">
@@ -76,6 +184,18 @@
 </div>
 
 </div>
+
+<%- include('../layout/footer') %>
+<script>
+$(document).ready(function () {
+  $('.select2-industry').select2({
+    placeholder: 'Select one or more industries',
+    allowClear: true,
+    width: '100%'
+  });
+});
+</script>
+
 <script>
   document.getElementById('mobile').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, ''); // remove non-digits
@@ -84,6 +204,50 @@
     }
   });
 </script>
+<script>
+
+  async function loadsubcategories(state_id,city_id=''){
+     let stateId = state_id; // Get selected state ID
+
+      if (stateId) {
+          try {
+              let response = await fetch(`/get-cities?state_id=${stateId}`);
+              let cities = await response.json();
+              
+              let cityDropdown = document.getElementById("city");
+              let selectedCityId = cityDropdown.dataset.selected; // Get previously selected city
+
+              cityDropdown.innerHTML = '<option value="">Select city</option>'; // Reset dropdown
+
+              cities.forEach(city => {
+                  let option = document.createElement("option");
+                  option.value = city._id;
+                  option.textContent = city.name;
+                  
+                  // Match the selected city ID and set it as selected
+                  if (selectedCityId && String(selectedCityId) === String(city._id)) {
+                      option.selected = true;
+                  }
+
+                  cityDropdown.appendChild(option);
+              });
+
+          } catch (error) {
+              console.error("Error fetching cities:", error);
+          }
+      }
+  }
+
+document.getElementById("state_id").addEventListener("change", async function() {
+    let stateId = this.value; // Get selected state ID
+    loadsubcategories(stateId);
+});
 
 
-<%- include('../layout/footer') %>
+  const preSelectedState = $('#state_id').val();
+  const preSelectedCity = $('#city').data('selected'); // Set this in HTML if available
+
+  if (preSelectedState) {
+    loadsubcategories(preSelectedState, preSelectedCity);
+  }
+</script>

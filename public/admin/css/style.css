@@ -180,6 +180,61 @@
     transition: background 0.3s ease, color 0.3s ease;
     }
 
+  .menu .has-sub > a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+    /* Submenu container */
+.sidebar .menu .submenu {
+  padding-left: 20px;
+  background-color: #f1f5f9; /* lighter background for submenu */
+  display: none; /* default hidden */
+}
+
+/* Show submenu when parent has "active" */
+.sidebar .menu li.active > .submenu {
+  display: block;
+}
+
+/* Submenu list items */
+.sidebar .menu .submenu li {
+  padding: 8px 15px;
+  font-size: 14px;
+  background: none !important;
+  color: #1e293b;
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+/* Submenu item active */
+.sidebar .menu .submenu li.active {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Submenu item hover */
+.sidebar .menu .submenu li:hover {
+  background-color: #e0f2fe;
+  color: #1d4ed8;
+  border-left-color: #93c5fd;
+}
+
+/* Submenu icons (optional if any) */
+.sidebar .menu .submenu li i {
+  margin-right: 8px;
+  color: inherit;
+}
+
+.sidebar .menu .submenu li a{
+  background: none; 
+  color: #45454c;
+}
+.sidebar .menu .submenu li.active a{
+   color: #1d4ed8;
+}
+
     
 
     .main {

@@ -27,6 +27,7 @@
            </div>
         </div>
       </div>
+      
 
       <!-- Responsive Table -->
       <div class="table-responsive">
@@ -36,8 +37,12 @@
                 <th>#</th>
                 <th>Industry</th>
                 <th>Name</th>
-                <th>Image</th>
-                <th>Address</th>
+                <!-- <th>Image</th> -->
+                <th>State</th>
+                <th>City</th>
+                <!-- <th>Pincode</th> -->
+                <th>Business Name</th>
+                <!-- <th>Address</th> -->
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Status</th>
@@ -49,10 +54,19 @@
                 <% manufacture_list.forEach((manufacture, index) => { %>
                     <tr>
                     <td><%= index + 1 %></td>
-                    <td><%= manufacture.industry_id ? manufacture.industry_id.name : '' %></td>
+                    <td>
+                      <% if (manufacture.industry_id && manufacture.industry_id.length) { %>
+                        <%= manufacture.industry_id.map(ind => ind.name).join(', ') %>
+                      <% } else { %>
+                        N/A
+                      <% } %>
+                    </td>
                     <td><%= manufacture.name %></td>
-                    <td><img src="<%= BASE_URL%>/uploads/manufacture/<%= manufacture.image %>" alt="" width="50px"></td>
-                    <td><%= manufacture.address %></td>
+                    <td><%= manufacture.state_id ? manufacture.state_id.name : '' %></td>
+                    <td><%= manufacture.city_id ? manufacture.city_id.name : '' %></td>
+                    <!-- <td><%= manufacture.pincode %></td> -->
+                    <td><%= manufacture.business_name %></td>
+                    <!-- <td><%= manufacture.address %></td> -->
                     <td><%= manufacture.contact_email %></td>
                     <td><%= manufacture.mobile %></td>
                     <td>
@@ -63,13 +77,14 @@
                         <% } %>
                     </td>
                     <td>
+                        <a href="<%= BASE_URL %>/manufacture/view/<%= manufacture.id %>" class="action-btn edit" title="Edit"><i class="fas fa-eye"></i></a>
                         <a href="<%= BASE_URL %>/manufacture/edit/<%= manufacture.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
                         <a href="<%= BASE_URL %>/manufacture/delete/<%= manufacture.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
                     </td>
                     </tr>
                 <% }) %>
                 <% } else { %>
-                <tr><td class="text-center" colspan="9">No data found</td></tr>
+                <tr><td class="text-center" colspan="10">No data found</td></tr>
                 <% } %>
             </tbody>
       </table>

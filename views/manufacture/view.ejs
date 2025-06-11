@@ -1,0 +1,187 @@
+<%- include('../layout/header') %>
+<style>
+    .product_details {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product_details h4, 
+.product_details h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.product_details p {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.product_details .badge {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.product_details .badge.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.product_details .badge.inactive {
+  background-color: #dc3545;
+  color: white;
+}
+
+.product_details img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.product_details .list-group-item {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.product_details .btn {
+  margin-right: 10px;
+}
+
+.product_description {
+  max-height: 250px;         /* Set maximum height */
+  overflow-y: auto;          /* Enable vertical scroll if needed */
+  background: #f8f9fa;       /* Light background for readability */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.product_description ul,
+.product_description ol {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.product_description p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.product_description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product_description::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.product_description::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+</style>
+<div class="content">
+   <div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Manufacture Details</h4>
+        </div>
+        <div class="card-body product_details">
+            <div class="row">
+
+              <!-- Manufacturer Info -->
+              <div class="col-md-6 col-sm-12 mb-3">
+                <p><strong>Name:</strong> <%= manufacture.name %></p>
+                <p><strong>Owner/Proprietor:</strong> <%= manufacture.owner_proprietor_name || 'N/A' %></p>
+                <p><strong>Business Type:</strong> <%= manufacture.business_type || 'N/A' %></p>
+                <p><strong>Business Name:</strong> <%= manufacture.business_name || 'N/A' %></p>
+                <p><strong>Mobile:</strong> <%= manufacture.mobile || 'N/A' %></p>
+                <p><strong>WhatsApp:</strong> <%= manufacture.whatsapp_mobile || 'N/A' %></p>
+                <p><strong>Email:</strong> <%= manufacture.contact_email || 'N/A' %></p>
+                <p><strong>Website:</strong> <%= manufacture.website || 'N/A' %></p>
+              </div>
+
+              <!-- Tax & Document Info -->
+              <div class="col-md-6 col-sm-12 mb-3">
+                <p><strong>GST No:</strong> <%= manufacture.gst_number || 'N/A' %></p>
+                <p><strong>PAN No:</strong> <%= manufacture.pan_number || 'N/A' %></p>
+                <p><strong>MSME No:</strong> <%= manufacture.msme_regisration || 'N/A' %></p>
+
+                <p><strong>Business Reg. Certificate:</strong><br>
+                  <% if (manufacture.business_registration_certificate) { %>
+                    <img src="<%= BASE_URL %>/uploads/manufacture/<%= manufacture.business_registration_certificate %>" alt="Reg. Certificate" class="img-thumbnail mt-2" style="max-width: 10%;">
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </p>
+
+                <p><strong>Profile Image:</strong><br>
+                  <% if (manufacture.image) { %>
+                    <img src="<%= BASE_URL %>/uploads/manufacture/<%= manufacture.image %>" alt="Profile" class="img-thumbnail mt-2" style="max-width: 10%;">
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </p>
+              </div>
+
+              <!-- Address Details -->
+              <div class="col-md-6 col-sm-12 mb-3">
+                <h5 class="mb-2">Address Details</h5>
+                <p><strong>State:</strong> <%= manufacture.state_id?.name || 'N/A' %></p>
+                <p><strong>City:</strong> <%= manufacture.city_id?.name || 'N/A' %></p>
+                <p><strong>Pincode:</strong> <%= manufacture.pincode || 'N/A' %></p>
+                <p><strong>Address:</strong> <%= manufacture.address || 'N/A' %></p>
+              </div>
+
+              <!-- Bank Details -->
+              <div class="col-md-6 col-sm-12 mb-3">
+                <h5 class="mb-2">Bank Details</h5>
+                <p><strong>Account Holder:</strong> <%= manufacture.account_holder_name || 'N/A' %></p>
+                <p><strong>Account Number:</strong> <%= manufacture.bank_account_number || 'N/A' %></p>
+                <p><strong>IFSC Code:</strong> <%= manufacture.bank_ifsc_code || 'N/A' %></p>
+                <p><strong>Bank Name:</strong> <%= manufacture.bank_name || 'N/A' %></p>
+                <p><strong>UPI ID:</strong> <%= manufacture.upi_id || 'N/A' %></p>
+                <p><strong>Cancelled Cheque / Passbook:</strong><br>
+                    <% if (manufacture.cancelled_cheque_passbook) { %>
+                    <img src="<%= BASE_URL %>/uploads/manufacture/<%= manufacture.cancelled_cheque_passbook %>" alt="Profile" class="img-thumbnail mt-2" style="max-width: 10%;">
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </p>
+              </div>
+
+              <!-- Status and Actions -->
+              <div class="col-12 mt-3">
+                <p><strong>Status:</strong>
+                  <% if (manufacture.status === 'active') { %>
+                    <span class="badge bg-success text-capitalize">Active</span>
+                  <% } else { %>
+                    <span class="badge bg-danger text-capitalize">Inactive</span>
+                  <% } %>
+                </p>
+
+                <hr>
+
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                  <a href="<%= BASE_URL %>/manufacture/edit/<%= manufacture.id %>" class="btn btn-primary">Edit Manufacturer</a>
+                  <a href="<%= BASE_URL %>/manufacture" class="btn btn-secondary">Back to List</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+</div>
+
+<%- include('../layout/footer') %>

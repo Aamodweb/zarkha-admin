@@ -1,29 +1,98 @@
 <script>
+    function successMsg(heading, message, html = "") {
+      Snackbar.show({
+          text: message,
+          backgroundColor: '#232323',
+          width: '475px',
+          pos: 'bottom-center'
+      });
+    }
+
+
+
+    function errorMsg(heading, message) {
+      Snackbar.show({
+          text: message,
+          backgroundColor: '#232323',
+          width: '475px',
+          pos: 'bottom-center'
+      });
+    }
 $(document).ready(function () {
   $('#adminUserForm').on('submit', function (e) {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
-    // Update CKEditor content to textarea
     for (instance in CKEDITOR.instances) {
       CKEDITOR.instances[instance].updateElement();
     }
 
-    var form = $(this)[0]; // Get raw DOM element
-    var formData = new FormData(form); // Use FormData to handle file + data
-    var actionUrl = $(this).attr('action');
-
-    // Remove any previous errors
+    // Clear old errors
     $('.is-invalid').removeClass('is-invalid');
     $('.invalid-feedback').remove();
+
+   let hasClientSideError = false;
+
+    // Validate required fields
+    $('[data-required]').each(function () {
+      const $field = $(this);
+      const label = $field.data('required');
+      const value = $field.val();
+      let isValid = false;
+
+      if ($field.is('select[multiple]')) {
+        isValid = Array.isArray(value) && value.length > 0;
+      } else if ($field.is('input[type="file"]')) {
+        isValid = $field[0].files.length > 0;
+      } else {
+        isValid = value && value.trim() !== '';
+      }
+
+      if (!isValid) {
+        hasClientSideError = true;
+        $field.addClass('is-invalid');
+
+        // Remove any existing feedback before adding again
+        if ($field.next('.invalid-feedback').length === 0) {
+          $field.after(`<div class="invalid-feedback">${label} is required.</div>`);
+        }
+      }
+    });
+
+
+      // Validate PAN Number format
+    const pan = $('#pan_number').val();
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (pan && !panRegex.test(pan.toUpperCase())) {
+      hasClientSideError = true;
+      $('#pan_number').addClass('is-invalid');
+      $('#pan_number').after('<div class="invalid-feedback">Invalid PAN Number format.</div>');
+    }
+
+    // Validate GST Number format
+    const gst = $('#gst_number').val();
+    const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    if (gst && !gstRegex.test(gst.toUpperCase())) {
+      hasClientSideError = true;
+      $('#gst_number').addClass('is-invalid');
+      $('#gst_number').after('<div class="invalid-feedback">Invalid GST Number format.</div>');
+    }
+
+    if (hasClientSideError) return;
+
+
+    const form = $(this)[0];
+    const formData = new FormData(form);
+    const actionUrl = $(this).attr('action');
 
     $.ajax({
       url: actionUrl,
       method: 'POST',
       data: formData,
-      processData: false, // Required for FormData
-      contentType: false, // Required for FormData
+      processData: false,
+      contentType: false,
       success: function (response) {
         if (response.status) {
+          // successMsg('Successfully', response.message);
           alert(response.message);
           window.location.href = response.redirect_url;
         } else {
@@ -41,7 +110,28 @@ $(document).ready(function () {
       }
     });
   });
+
+  // Auto-remove error message when user types or selects
+$(document).on('input change', '[data-required]', function () {
+  const $field = $(this);
+  const value = $field.val();
+
+  // Check if value is valid:
+  let isValid = false;
+
+  if ($field.is('select[multiple]')) {
+    isValid = Array.isArray(value) && value.length > 0;
+  } else if ($field.is('input[type="file"]')) {
+    isValid = $field[0].files.length > 0;
+  } else {
+    isValid = value && value.trim() !== '';
+  }
+
+  if (isValid) {
+    $field.removeClass('is-invalid');
+    $field.next('.invalid-feedback').remove();
+  }
 });
 
-
+});
 </script>

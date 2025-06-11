@@ -1,0 +1,63 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (state) { %>
+             <span>Edit State</span>
+        <% } else { %>
+             <span>Create State</span>
+        <% } %>
+      <a href="/state" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/state/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (state) { %>
+            <input type="hidden" name="id" value="<%= state.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="mb-3">
+              <label>Country</label>
+              <select name="country_id" id="country_id" class="form-control" required>
+                 <option value="">Select one</option>
+                <% if (country) { country.forEach(coun => { %>
+                  <option value="<%= coun._id %>"  <% if (state && String(state.country_id) === String(coun._id)) { %> selected <% } %>><%= coun.name %></option>
+                <% }) } %>
+              </select>
+            </div>
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= state && state.name ? state.name : '' %>"  placeholder="Enter State Name" required>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="name" class="form-label">State Code</label>
+            <input type="text" class="form-control" id="code" name="code" value="<%= state && state.code ? state.code : '' %>"  placeholder="Enter State Code" required>
+          </div>
+        </div>
+
+        <div class="text-end">
+             <% if (state) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update State</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create State</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+  document.getElementById('mobile').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, ''); // remove non-digits
+    if (this.value.length > 10) {
+      this.value = this.value.slice(0, 10); // max 10 digits
+    }
+  });
+</script>
+
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,63 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (city) { %>
+             <span>Edit City</span>
+        <% } else { %>
+             <span>Create City</span>
+        <% } %>
+      <a href="/city" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/city/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (city) { %>
+            <input type="hidden" name="id" value="<%= city.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="mb-3">
+              <label>State</label>
+              <select name="state_id" id="state_id" class="form-control" required>
+                 <option value="">Select one</option>
+                <% if (state) { state.forEach(st => { %>
+                  <option value="<%= st._id %>"  <% if (city && String(city.state_id) === String(st._id)) { %> selected <% } %>><%= st.name %></option>
+                <% }) } %>
+              </select>
+            </div>
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= city && city.name ? city.name : '' %>"  placeholder="Enter City Name" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="name" class="form-label">City Code</label>
+            <input type="text" class="form-control" id="code" name="code" value="<%= city && city.code ? city.code : '' %>"  placeholder="Enter City Code" required>
+          </div>
+        </div>
+
+        <div class="text-end">
+             <% if (city) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update City</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create City</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+  document.getElementById('mobile').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, ''); // remove non-digits
+    if (this.value.length > 10) {
+      this.value = this.value.slice(0, 10); // max 10 digits
+    }
+  });
+</script>
+
+
+<%- include('../layout/footer') %>
