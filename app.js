@@ -69,7 +69,7 @@ app.post('/webhook', (req, res) => {
   res.status(200).send('Deployment started');
 
   // Then run the script AFTER response
-  exec('/var/www/zarkha/deploy.sh', (error, stdout, stderr) => {
+  exec('/var/www/zarkha/admin/deploy.sh', (error, stdout, stderr) => {
     if (error) {
       console.error('Deploy script error:', error);
       return;
