@@ -11,12 +11,12 @@ $(document).on('click', '.has-sub > a', function (e) {
   e.preventDefault();
   const $parent = $(this).parent();
 
-  const isRouteActive = $parent.find('li.active').length > 0;
+  // const isRouteActive = $parent.find('li.active').length > 0;
 
   // Only toggle 'active' class if no subitem is already active
-  if (!isRouteActive) {
-    $parent.toggleClass('active');
-  }
+  // $parent.toggleClass('active');
+  // if (!isRouteActive) {
+  // }
 
   // Always toggle the submenu display (show/hide)
   $parent.find('.submenu').first().slideToggle(200);
