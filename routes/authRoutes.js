@@ -20,9 +20,11 @@ const brandsController = require('../controllers/BrandsController');
 const unitsController = require('../controllers/UnitsController');
 const productController = require('../controllers/ProductController');
 const manufactureController = require('../controllers/ManufactureController');
+const partnerController = require('../controllers/PartnerController');
 const stateController = require('../controllers/StateController');
 const cityController = require('../controllers/CityController');
 const countryController = require('../controllers/CountriesController');
+const HashtagController = require('../controllers/HashtagController');
 
 // Routes
 router.get('/',redirectIfAuthenticated, authController.login);
@@ -114,7 +116,7 @@ router.get('/product/edit/:id',authMiddleware, productController.Edit);
 router.get('/product/delete/:id',authMiddleware, productController.Delete);
 router.post('/product/image/delete/',authMiddleware,upload.none(), productController.ProductImageDelete);
 
-// brands module
+
 const manufactureUploadPath = 'uploads/manufacture/';
 const  manufactureStorage = setupStorage(manufactureUploadPath);
 const manufactureUpload = multer({ storage: manufactureStorage });
@@ -130,6 +132,30 @@ router.post('/manufacture/store',authMiddleware,   manufactureUpload.fields([
 router.get('/manufacture/edit/:id',authMiddleware, manufactureController.Edit);
 router.get('/manufacture/view/:id',authMiddleware, manufactureController.View);
 router.get('/manufacture/delete/:id',authMiddleware, manufactureController.Delete);
+
+
+// partner module 
+const partnerUploadPath = 'uploads/partner/';
+const  partnerStorage = setupStorage(partnerUploadPath);
+const partnerUpload = multer({ storage: partnerStorage });
+
+
+router.get('/partner',authMiddleware, partnerController.List);
+router.get('/partner/create',authMiddleware, partnerController.Create);
+router.post('/partner/store', authMiddleware, partnerUpload.fields([
+  { name: 'store_logo', maxCount: 1 },
+  { name: 'registration_certificate', maxCount: 1 },
+  { name: 'cheque_or_passbook', maxCount: 1 },
+  { name: 'document_front_image', maxCount: 1 },
+  { name: 'digital_signature', maxCount: 1 },
+  { name: 'document_back_image', maxCount: 1 }
+]), partnerController.Store);
+router.get('/partner/edit/:id',authMiddleware, partnerController.Edit);
+router.get('/partner/view/:id',authMiddleware, partnerController.View);
+router.get('/partner/delete/:id',authMiddleware, partnerController.Delete);
+router.get('/partner/get/:id',authMiddleware, partnerController.GetPartnerdetails);
+router.post('/partner/update-credentials/',authMiddleware, partnerController.UpdatePartnerCreditional);
+
 
 // country  module 
 router.get('/country',authMiddleware, countryController.List);
@@ -161,6 +187,14 @@ router.get('/city/edit/:id',authMiddleware, cityController.Edit);
 router.get('/city/delete/:id',authMiddleware, cityController.Delete);
 router.get('/get-cities',authMiddleware, cityController.GetCity);
 router.post('/city/import-xlsx',authMiddleware,csvUpload.single('csvFile'), cityController.ImportXLSX);
+
+
+// hashtag module
+router.get('/hashtag',authMiddleware, HashtagController.List);
+router.get('/hashtag/create',authMiddleware, HashtagController.Create);
+router.post('/hashtag/store',authMiddleware,upload.none(),HashtagController.Store);
+router.get('/hashtag/edit/:id',authMiddleware, HashtagController.Edit);
+router.get('/hashtag/delete/:id',authMiddleware, HashtagController.Delete);
 
 
 router.get('/logout', (req, res) => {

@@ -7,6 +7,7 @@ const Units = require('../models/Units');
 const Product = require('../models/Product'); // Your Product model
 const Variant = require('../models/Variant');
 const ColorImage = require('../models/ColorImage');
+const Hashtag = require('../models/Hashtag');
 const path = require('path');
 
 const List = async(req,res)=>{
@@ -17,6 +18,7 @@ const List = async(req,res)=>{
                                    .populate('category_id')
                                    .populate('subcategory_id')
                                    .populate('brand_id')
+                                   .populate('product_tags')
                                   .sort({ createdAt: -1 }); // optional sorting
 
         res.render('product/index', { products, message: "" });
@@ -40,8 +42,10 @@ const Create = async(req,res)=>{
 
             const units = await Units.find({ status: 'active' });
 
+            const hashtag = await Hashtag.find({ status: 'active' });
+
             // Render the create page with the industries
-            res.render('product/create', { product,categorys,industries,subcategory,brands,units, message: "" });
+            res.render('product/create', { product,categorys,industries,subcategory,brands,units,hashtag, message: "" });
         }
         catch(error){
             console.log(error.message);
@@ -217,7 +221,11 @@ const Store = async (req, res) => {
       return_notes,
       seo_title,
       seo_description,
-      product_tags: product_tags ? product_tags.split(',') : [],
+      product_tags: Array.isArray(product_tags)
+                    ? product_tags
+                    : typeof product_tags === 'string' && product_tags.trim() !== ''
+                      ? [product_tags]
+                      : [],
       status,
       updated_at: new Date()
     };
@@ -263,12 +271,13 @@ const Edit = async (req, res) => {
             const brands = await Brands.find({ status: 'active' });
 
             const units = await Units.find({ status: 'active' });
+             const hashtag = await Hashtag.find({ status: 'active' });
 
         // console.log(product,"product data");
         if (!product) {
               return res.redirect('/product');
         }
-          res.render('product/create', { product,categorys,subcategory,brands,units,industries, message: "" });
+          res.render('product/create', { product,categorys,subcategory,brands,units,industries,hashtag, message: "" });
 
     }
     catch (error) {
@@ -287,9 +296,8 @@ const View = async (req, res) => {
                                    .populate('industry_id')
                                    .populate('category_id')
                                    .populate('subcategory_id')
+                                   .populate('product_tags')
                                    .populate('brand_id');
-                                   
-
         if (!product) {
               return res.redirect('/product');
         }
@@ -345,15 +353,15 @@ const ProductImageDelete = async (req, res) => {
 
 const Delete = async (req, res) => {
  try {
-        const categoryId = req.params.id;
+        const productId = req.params.id;
         // Find the user by ID
-        const category = await Category.findById(categoryId);
-        if (!category) {
+        const productidd = await Product.findById(productId);
+        if (!productidd) {
            return res.redirect('/product');
         }
 
         // Delete the user
-        await Category.findByIdAndDelete(categoryId);
+        await Product.findByIdAndDelete(productidd);
 
         // Redirect to the admin user list with a success message
         req.flash('success', 'Product deleted successfully');
@@ -362,7 +370,7 @@ const Delete = async (req, res) => {
     }
     catch (error) {
         console.error(error.message);
-        return res.redirect('/category');
+        return res.redirect('/product');
     }
 
 }

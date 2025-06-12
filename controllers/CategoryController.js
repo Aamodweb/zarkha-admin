@@ -1,12 +1,14 @@
 const bcrypt = require('bcrypt');
 const Industry = require('../models/Industry');
 const Category = require('../models/Category');
+const Hashtag = require('../models/Hashtag');
 
 const List = async(req,res)=>{
     try{
         // Fetch all admin users from the collection
          const categories = await Category.find()
                                   .populate('industry_id') // this will populate the industry details
+                                  .populate('hash_tags') // this will populate the industry details
                                   .sort({ createdAt: -1 }); // optional sorting
 
 
@@ -22,8 +24,11 @@ const Create = async(req,res)=>{
         const category = null;
         // Fetch all industries to populate the dropdown
         const industries = await Industry.find({ status: 'active' });
+
+         const hashtag = await Hashtag.find({ status: 'active' });
+
         // Render the create page with the industries
-        res.render('category/create', { category,industries, message: "" });
+        res.render('category/create', { category,industries,hashtag, message: "" });
     }
     catch(error){
         console.log(error.message);
@@ -43,7 +48,7 @@ const slugify = (text) => {
 
 const Store = async (req, res) => {
   try {
-    const { id, industry_id, name, description, status } = req.body;
+    const { id, industry_id, name, description, status,hash_tags } = req.body;
 
     const slug = slugify(name);
 
@@ -87,6 +92,12 @@ const Store = async (req, res) => {
           slug,
           description,
           status,
+          seo: req.body.seo,
+          hash_tags: Array.isArray(hash_tags)
+                    ? hash_tags
+                    : typeof hash_tags === 'string' && hash_tags.trim() !== ''
+                      ? [hash_tags]
+                      : [],
         };
 
         // Only update image if new one uploaded
@@ -113,6 +124,12 @@ const Store = async (req, res) => {
         image: category_image, // Use the new image path
         description,
         status: status,
+        seo: req.body.seo,
+         hash_tags: Array.isArray(hash_tags)
+                    ? hash_tags
+                    : typeof hash_tags === 'string' && hash_tags.trim() !== ''
+                      ? [hash_tags]
+                      : [],
         // image: req.file?.filename || null // Optional if handling images
       });
 
@@ -143,12 +160,13 @@ const Edit = async (req, res) => {
         const category = await Category.findById(CategoryId);
 
         const industries = await Industry.find({ status: 'active' });
+         const hashtag = await Hashtag.find({ status: 'active' });
 
         console.log(category,"category data");
         if (!category) {
               return res.redirect('/category');
         }
-          res.render('category/create', { category,industries, message: "" });
+          res.render('category/create', { category,industries,hashtag, message: "" });
 
     }
     catch (error) {

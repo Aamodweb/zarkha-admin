@@ -167,7 +167,13 @@
                         <p><strong>Return Policy Notes:</strong> <%= product.return_notes ? product.return_notes : 'N/A' %></p>
                         <p><strong>SEO Title:</strong> <%= product.seo_title ? product.seo_title : 'N/A' %></p>
                         <p><strong>SEO Description:</strong> <%= product.seo_description ? product.seo_description : 'N/A' %></p>
-                        <p><strong>Product Tags / Keywords:</strong> <%= product.product_tags ? product.product_tags : 'N/A' %></p>
+                        <p><strong>Product Tags / Keywords:</strong> <% if (product.product_tags && product.product_tags.length) { %>
+                          <% product.product_tags.forEach(tag => { %>
+                            <span class="badge bg-secondary">#<%= tag.name %></span>
+                          <% }) %>
+                        <% } else { %>
+                          N/A
+                        <% } %></p>
                  </div>
             </div>
 

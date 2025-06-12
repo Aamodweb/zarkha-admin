@@ -216,15 +216,16 @@
                        <textarea name="seo_description" class="form-control" placeholder="Enter a brief SEO description for better Google visibility."><%= product && product.seo_description ? product.seo_description : '' %></textarea>
                   </div>
                   <div class="col-md-4">
-                      <label for="product_tags" class="form-label">Product Tags / Keywords (Optional)</label>
-                        <input type="text" name="product_tags" class="form-control" 
-                              value="<%= (typeof product === 'object' && product && product.product_tags) 
-                                        ? (Array.isArray(product.product_tags) 
-                                            ? product.product_tags.join(', ') 
-                                            : product.product_tags) 
-                                        : '' %>" 
-                              placeholder="e.g., t-shirt, cotton, summer, men's wear">
-                        <small>Comma-separated tags for better searchability.</small>
+                    <label for="product_tags" class="form-label">Product Tags / Hashtags (Optional)</label>
+                    <select name="product_tags[]" id="product_tags" class="form-control select2" multiple>
+                      <% hashtag.forEach((tag) => { %>
+                        <option value="<%= tag.id %>" 
+                          <% if (product && Array.isArray(product.product_tags) && product.product_tags.includes(tag.id)) { %> selected <% } %>>
+                          #<%= tag.name %>
+                        </option>
+                      <% }) %>
+                    </select>
+                    <small>Select one or more hashtags for better searchability.</small>
                   </div>
                   <div class="col-md-4">
                     <label for="status" class="form-label">Status</label>
@@ -578,6 +579,15 @@ $('input[name="image_type"]').on('change', toggleImageSections);
         console.error(err);
         alert('Error deleting image');
       });
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $('#product_tags').select2({
+      placeholder: "Select hashtags",
+      tags: true,
+      tokenSeparators: [',']
     });
   });
 </script>

@@ -1,0 +1,75 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Hashtag List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search hashtag..."
+              aria-label="Search hashtag"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/hashtag/create" class="btn btn-add btn-primary">+ Add New Hashtag</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (hashtag && hashtag.length > 0) { %>
+                    <% hashtag.forEach((hash, index) => { %>
+                        <tr>
+                          <td><%= index + 1 %></td>
+                          <td><%= hash.name %></td>
+                          <td><%= hash.description %></td>
+                          <td>
+                            <% if (hash.status === 'active') { %>
+                              <span class="status active"><%= hash.status %></span>
+                              <% } else { %>
+                              <span class="status inactive"><%= hash.status %></span> 
+                              <% } %>
+                          </td>
+                          <td>
+                              <a href="<%= BASE_URL %>/hashtag/edit/<%= hash.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                              <a href="<%= BASE_URL %>/hashtag/delete/<%= hash.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                          </td>
+                        </tr>
+                    <% }) %>
+                    <% } else { %>
+                    <tr><td class="text-center" colspan="7">No data found</td></tr>
+                    <% } %>
+                </tbody>
+          </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

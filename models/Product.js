@@ -49,7 +49,7 @@ const ProductSchema = new mongoose.Schema({
 
   seo_title: { type: String },
   seo_description: { type: String },
-  product_tags: [String], // Store as array of keywords
+product_tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Hashtag' }],
 
   status: {
     type: String,

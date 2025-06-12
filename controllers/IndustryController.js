@@ -1,11 +1,13 @@
 const bcrypt = require('bcrypt');
 const Industry = require('../models/Industry');
 const jwt = require('jsonwebtoken');
+const Hashtag = require('../models/Hashtag');
 
 const List = async(req,res)=>{
     try{
         // Fetch all admin users from the collection
-         const industries = await Industry.find();
+         const industries = await Industry.find()
+                                 .populate('hash_tags');
 
         res.render('industry/index', { industries, message: "" });
     }
@@ -17,7 +19,8 @@ const List = async(req,res)=>{
 const Create = async(req,res)=>{
     try{
         const industry = null;
-        res.render('industry/create', { industry, message: "" });
+          const hashtag = await Hashtag.find({ status: 'active' });
+        res.render('industry/create', { industry,hashtag, message: "" });
     }
     catch(error){
         console.log(error.message);
@@ -25,7 +28,7 @@ const Create = async(req,res)=>{
 }
 const Store = async (req, res) => {
   try {
-    const { id, name, description, status } = req.body;
+    const { id, name, description, status,hash_tags } = req.body;
 
     const slug = name.trim().toLowerCase().replace(/\s+/g, '-');
 
@@ -55,6 +58,12 @@ const Store = async (req, res) => {
           slug,
           description,
           status: status,
+          seo: req.body.seo,
+          hash_tags: Array.isArray(hash_tags)
+                    ? hash_tags
+                    : typeof hash_tags === 'string' && hash_tags.trim() !== ''
+                      ? [hash_tags]
+                      : [],
         },
         { new: true }
       );
@@ -72,6 +81,12 @@ const Store = async (req, res) => {
         slug,
         description,
         status: status,
+        seo: req.body.seo,
+        hash_tags: Array.isArray(hash_tags)
+                  ? hash_tags
+                  : typeof hash_tags === 'string' && hash_tags.trim() !== ''
+                    ? [hash_tags]
+                    : [],
       });
 
       await newIndustry.save();
@@ -101,11 +116,12 @@ const Edit = async (req, res) => {
         const IndustryId = req.params.id;
         // Find the user by ID
         const industry = await Industry.findById(IndustryId);
+         const hashtag = await Hashtag.find({ status: 'active' });
         console.log(industry,"industry data");
         if (!industry) {
               return res.redirect('/industry');
         }
-          res.render('industry/create', { industry });
+          res.render('industry/create', { industry,hashtag });
 
     }
     catch (error) {

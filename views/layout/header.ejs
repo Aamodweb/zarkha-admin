@@ -59,8 +59,12 @@
     <a href="/manufacture"><i class="fas fa-box"></i> <span>Manufacture</span></a>
   </li>
 
+  <li class="<%= currentRoute.startsWith('/partner') ? 'active' : '' %>">
+    <a href="/partner"><i class="fas fa-user"></i> <span>Partners</span></a>
+  </li>
+
   <!-- Common Setting Dropdown -->
-  <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') ? 'active' : '' %>">
+  <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') || currentRoute.startsWith('/hashtag') ? 'active' : '' %>">
     <a href="javascript:void(0)"><span> <i class="fas fa-cogs"></i>  Common Setting</span>  <i class="fas fa-chevron-down submenu-toggle-icon"></i></a>
     <ul class="submenu">
       <li class="<%= currentRoute.startsWith('/industry') ? 'active' : '' %>">
@@ -83,6 +87,9 @@
       </li>
       <li class="<%= currentRoute.startsWith('/city') ? 'active' : '' %>">
         <a href="/city"><i class="fas fa-city"></i> City</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/hashtag') ? 'active' : '' %>">
+        <a href="/hashtag"><i class="fas fa-hashtag"></i> HashTag</a>
       </li>
     </ul>
   </li>

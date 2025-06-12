@@ -38,6 +38,7 @@
                 <th>Name</th>
                 <th>Image</th>
                 <th>Description</th>
+                <th>HashTag</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -51,6 +52,15 @@
                     <td><%= sub.name %></td>
                     <td><img src="<%= BASE_URL%>/uploads/subcategory/<%= sub.image %>" alt="" width="50px"></td>
                     <td><%= sub.description %></td>
+                      <td>
+                        <% if (sub.hash_tags && sub.hash_tags.length) { %>
+                          <% sub.hash_tags.forEach(tag => { %>
+                            <span class="badge bg-secondary">#<%= tag.name %></span>
+                          <% }) %>
+                        <% } else { %>
+                          N/A
+                        <% } %>
+                      </td>
                     <td>
                        <% if (sub.status === 'active') { %>
                          <span class="status active"><%= sub.status %></span>

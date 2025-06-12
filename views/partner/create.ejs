@@ -1,0 +1,435 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (partner) { %>
+             <span>Edit Partner</span>
+        <% } else { %>
+             <span>Create Partner</span>
+        <% } %>
+      <a href="/partner" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/partner/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (partner) { %>
+            <input type="hidden" name="id" value="<%= partner.id %>">
+            <% } %>
+                  <!-- A. Basic Information -->
+                  <h3 class="mt-4">A. Basic Information</h3>
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="name" class="form-label">Boutique Name <span class="mandatory">*</span></label>
+                      <input type="text" id="name" name="name" class="form-control string-only" value="<%= partner && partner.name ? partner.name : '' %>" data-required="Boutique Name" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="proprietor_name" class="form-label">Proprietor/Owner Name <span class="mandatory">*</span></label>
+                      <input type="text" id="proprietor_name" name="proprietor_name" class="form-control string-only" value="<%= partner && partner.boutique.proprietor_name ? partner.boutique.proprietor_name : '' %>" data-required="Proprietor/Owner Name" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="mobile" class="form-label">Mobile Number <span class="mandatory">*</span></label>
+                      <input type="text" id="mobile" name="mobile" class="form-control mobile-only" value="<%= partner && partner.mobile ? partner.mobile : '' %>" data-required="Mobile Number" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="whatsapp" class="form-label">WhatsApp Number </label>
+                      <input type="text" id="whatsapp" name="whatsapp" value="<%= partner && partner.whatsapp ? partner.whatsapp : '' %>" class="form-control" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="email" class="form-label">Email ID <span class="mandatory">*</span></label>
+                      <input type="email" id="email" name="email" class="form-control" value="<%= partner && partner.email ? partner.email : '' %>" data-required="Email ID" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="business_type" class="form-label">Business Type <span class="mandatory">*</span></label>
+                        <select class="form-select" id="business_type" name="business_type" data-required="Business Type">
+                          <option value="">Select Business Type</option>
+                          <option value="Proprietorship" <% if (partner && partner.boutique.business_type === 'Proprietorship') { %> selected <% } %>>Proprietorship</option>
+                          <option value="Partnership" <% if (partner && partner.boutique.business_type === 'Partnership') { %> selected <% } %>>Partnership</option>
+                          <option value="Pvt Ltd" <% if (partner && partner.boutique.business_type === 'Pvt Ltd') { %> selected <% } %>>Pvt Ltd</option>
+                          <option value="LLP" <% if (partner && partner.boutique.business_type === 'LLP') { %> selected <% } %>>LLP</option>
+                          <option value="Other" <% if (partner && partner.boutique.business_type === 'Other') { %> selected <% } %>>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="gst_number" class="form-label">GST Number <span class="mandatory">*</span></label>
+                      <input type="text" id="gst_number" name="gst_number" class="form-control" value="<%= partner && partner.boutique.gst_number ? partner.boutique.gst_number : '' %>" data-required="GST Number" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="pan_number" class="form-label">PAN Number <span class="mandatory">*</span></label>
+                      <input type="text" id="pan_number" name="pan_number" class="form-control" value="<%= partner && partner.boutique.pan_number ? partner.boutique.pan_number : '' %>" data-required="PAN Number" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="document_type" class="form-label">Document Type <span class="mandatory">*</span></label>
+                       <select name="document_type" id="document_type" class="form-select" data-required="Document Type">
+                         <option value="">Select One</option>
+                         <option value="aadhaar" <% if (partner && partner.boutique.document_type === 'aadhaar') { %> selected <% } %>>Aadhaar</option>
+                         <option value="pan" <% if (partner && partner.boutique.document_type === 'pan') { %> selected <% } %>>PAN</option>
+                         <option value="other" <% if (partner && partner.document_type === 'other') { %> selected <% } %>>Other</option>
+                       </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="document_front_image" class="form-label">Document Front Image <span class="mandatory">*</span></label>
+                      <input type="file" id="document_front_image" name="document_front_image" class="form-control"  <% if (!partner) { %> data-required="Document Front Image" <% } %>/>
+                        <% if (partner && partner.boutique.document_front) { %>
+                         <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.document_front %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                        <% } %>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="document_back_image" class="form-label">Document Back Image </label>
+                      <input type="file" id="document_back_image" name="document_back_image" class="form-control" />
+                       <% if (partner && partner.boutique.document_back) { %>
+                         <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.document_back %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                        <% } %>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="registration_certificate" class="form-label">Business Registration Certificate <span class="mandatory">*</span></label>
+                      <input type="file" id="registration_certificate" name="registration_certificate" class="form-control"  <% if (!partner) { %> data-required="Business Registration Certificate" <% } %>/>
+                        <% if (partner && partner.boutique.registration_certificate) { %>
+                         <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.registration_certificate %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                        <% } %>
+                    </div>
+                  </div>
+
+                  <!-- B. Store & Pickup Address -->
+                  <h3 class="mt-4">B. Store & Pickup Address</h3>
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="store_name" class="form-label">Store Name <span class="mandatory">*</span></label>
+                      <input type="text" id="store_name" name="store_name" class="form-control" value="<%= partner && partner.store_name ? partner.store_name : '' %>" data-required="Store Name" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="pickup_address_1" class="form-label">Pickup Address Line 1 <span class="mandatory">*</span></label>
+                      <textarea id="pickup_address_1" name="pickup_address_1" class="form-control" data-required="Pickup Address Line 1" rows="2"><%= partner && partner.pickup_address_1 ? partner.pickup_address_1 : '' %></textarea>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="pickup_address_2" class="form-label">Pickup Address Line 2</label>
+                      <textarea id="pickup_address_2" name="pickup_address_2" class="form-control" rows="2"><%= partner && partner.pickup_address_2 ? partner.pickup_address_2 : '' %></textarea>
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                      <label for="pincode" class="form-label">Pincode <span class="mandatory">*</span></label>
+                      <input type="text" id="pincode" name="pincode" class="form-control only-number" value="<%= partner && partner.pincode ? partner.pincode : '' %>" data-required="Pincode"/>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+
+                    <div class="col-md-3 mb-2">
+                      <label for="state" class="form-label">State <span class="mandatory">*</span></label>
+                        <select name="state_id" id="state_id" class="form-select" data-required="State">
+                          <option value="">Select One</option>
+                          <% if (states) { states.forEach(stat => { %>
+                              <option value="<%= stat._id %>"  <% if (partner && String(partner.state_id) === String(stat._id)) { %> selected <% } %>><%= stat.name %></option>
+                          <% }) } %>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="city" class="form-label">City <span class="mandatory">*</span></label>
+                        <select id="city" name="city_id" class="form-select" data-required="City" data-selected="<%= partner && partner.city_id ? partner.city_id : '' %>">
+                          <option value="">Select One</option>
+                         
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="pickup_contact_person" class="form-label">Pickup Contact Person <span class="mandatory">*</span></label>
+                      <input type="text" id="pickup_contact_person" name="pickup_contact_person" class="form-control" value="<%= partner && partner.pickup_contact_person ? partner.pickup_contact_person : '' %>" data-required="Pickup Contact Person"/>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="pickup_phone" class="form-label">Pickup Phone <span class="mandatory">*</span></label>
+                      <input type="text" id="pickup_phone" name="pickup_phone" class="form-control mobile-only" value="<%= partner && partner.pickup_phone ? partner.pickup_phone : '' %>" data-required="Pickup Phone"/>
+                    </div>
+                  </div>
+
+                  <!-- C. Bank & Payment Details -->
+                  <h3 class="mt-4">C. Bank & Payment Details</h3>
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="bank_account_holder" class="form-label">Account Holder Name <span class="mandatory">*</span></label>
+                      <input type="text" id="bank_account_holder" name="bank_account_holder" value="<%= partner && partner.bank_account_holder ? partner.bank_account_holder : '' %>" class="form-control" data-required="Account Holder Name" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="bank_account_number" class="form-label">Bank Account Number <span class="mandatory">*</span></label>
+                      <input type="text" id="bank_account_number" name="bank_account_number" value="<%= partner && partner.bank_account_number ? partner.bank_account_number : '' %>" class="form-control" data-required="Bank Account Number"  />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="ifsc_code" class="form-label">IFSC Code <span class="mandatory">*</span></label>
+                      <input type="text" id="ifsc_code" name="ifsc_code" value="<%= partner && partner.ifsc_code ? partner.ifsc_code : '' %>" class="form-control" data-required="IFSC Code"/>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="bank_name" class="form-label">Bank Name <span class="mandatory">*</span></label>
+                      <input type="text" id="bank_name" name="bank_name" value="<%= partner && partner.bank_name ? partner.bank_name : '' %>" class="form-control" data-required="Bank Name"/>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="cheque_or_passbook" class="form-label">Cancelled Cheque / Passbook <span class="mandatory">*</span></label>
+                      <input type="file" id="cheque_or_passbook" name="cheque_or_passbook"  class="form-control" <% if (!partner) { %> data-required="Cancelled Cheque / Passbook" <% } %>/>
+                        <% if (partner && partner.cheque_or_passbook) { %>
+                         <img src="<%= BASE_URL %>/uploads/partner/<%= partner.cheque_or_passbook %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                        <% } %>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="upi_id" class="form-label">UPI ID </label>
+                      <input type="text" id="upi_id" name="upi_id" class="form-control" value="<%= partner && partner.upi_id ? partner.upi_id : '' %>" />
+                    </div>
+                  </div>
+
+                  <!-- D. Boutique Settings -->
+                  <h3 class="mt-4">D. Boutique Settings</h3>
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="margin_percent" class="form-label">Boutique Margin % <span class="mandatory">*</span></label>
+                      <input type="number" id="margin_percent" name="margin_percent" class="form-control" value="<%= partner && partner.boutique.margin_percent ? partner.boutique.margin_percent : '' %>"  data-required="Boutique Margin %"/>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="return_policy" class="form-label">Return Policy <span class="mandatory">*</span></label>
+                      <select name="return_policy" id="return_policy" class="form-control" data-required="Return Policy %">
+                        <option value="">Select</option>
+                        <option value="7_days" <% if (partner && partner.boutique.return_policy === '7_days') { %> selected <% } %>>7 Days</option>
+                        <option value="no_return" <% if (partner && partner.boutique.return_policy === 'no_return') { %> selected <% } %>>No Return</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="delivery_partner_preference" class="form-label">Delivery Partner Preference <span class="mandatory">*</span></label>
+                      <select name="delivery_partner_preference" id="delivery_partner_preference" class="form-control" data-required="Delivery Partner Preference">
+                        <option value="zarkha" <% if (partner && partner.boutique.delivery_partner_preference === 'zarkha') { %> selected <% } %>>Zarkha</option>
+                        <option value="self" <% if (partner && partner.boutique.delivery_partner_preference === 'self') { %> selected <% } %>>Self</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-3 form-check">
+                      <input type="checkbox" name="has_inventory" id="has_inventory" class="form-check-input" value="true" <% if (partner && partner.boutique.has_inventory === true) { %> checked <% } %> />
+                      <label for="has_inventory" class="form-check-label">Stock your own inventory?</label>
+                    </div>
+                    <div class="col-md-3 form-check">
+                      <input type="checkbox" name="source_from_zarkha" id="source_from_zarkha" class="form-check-input" value="true" <% if (partner && partner.boutique.source_from_zarkha === true) { %> checked <% } %>/>
+                      <label for="source_from_zarkha" class="form-check-label">Source from Zarkha?</label>
+                    </div>
+                    <div class="col-md-3 form-check">
+                      <input type="checkbox" name="self_pricing_enabled" id="self_pricing_enabled" class="form-check-input" value="true" <% if (partner && partner.boutique.self_pricing_enabled === true) { %> checked <% } %>/>
+                      <label for="self_pricing_enabled" class="form-check-label">Enable Self Pricing?</label>
+                    </div>
+                    <div class="col-md-3 form-check">
+                      <input type="checkbox" name="custom_branding_enabled" id="custom_branding_enabled" class="form-check-input" value="true" <% if (partner && partner.boutique.custom_branding_enabled === true) { %> checked <% } %> />
+                      <label for="custom_branding_enabled" class="form-check-label">Custom Branding Enabled?</label>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="operating_days" class="form-label">Operating Days <span class="mandatory">*</span></label>
+                      <select name="operating_days[]" id="operating_days" class="form-control operating_days" multiple data-required="Operating Days">
+                        <option value="mon" <%= partner && partner.boutique.operating_days?.includes('mon') ? 'selected' : '' %>>Mon</option>
+                        <option value="tue" <%= partner && partner.boutique.operating_days?.includes('tue') ? 'selected' : '' %>>Tue</option>
+                        <option value="wed" <%= partner && partner.boutique.operating_days?.includes('wed') ? 'selected' : '' %>>Wed</option>
+                        <option value="thu" <%= partner && partner.boutique.operating_days?.includes('thu') ? 'selected' : '' %>>Thu</option>
+                        <option value="fri" <%= partner && partner.boutique.operating_days?.includes('fri') ? 'selected' : '' %>>Fri</option>
+                        <option value="sat" <%= partner && partner.boutique.operating_days?.includes('sat') ? 'selected' : '' %>>Sat</option>
+                        <option value="sun" <%= partner && partner.boutique.operating_days?.includes('sun') ? 'selected' : '' %>>Sun</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                      <label class="form-label">Working Hours</label>
+                      <div class="d-flex gap-2">
+                        <input type="time" name="working_hours_start" class="form-control" 
+                          value="<%= partner?.boutique?.working_hours?.start || '' %>" />
+
+                        <input type="time" name="working_hours_end" class="form-control" 
+                          value="<%= partner?.boutique?.working_hours?.end || '' %>" />
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- E. Digital Access & Agreement -->
+                  <h3 class="mt-4">E. Digital Access & Agreement</h3>
+                  <div class="row mb-3">
+                     <% if (!partner) { %>
+                    <div class="col-md-3 mb-2">
+                      <label for="dashboard_email" class="form-label">CRM Dashboard Email <span class="mandatory">*</span></label>
+                      <input type="email" id="dashboard_email" name="dashboard_email" class="form-control" value="<%= partner && partner.dashboard_email ? partner.dashboard_email : '' %>"  data-required="CRM Dashboard Email"/>
+                    </div>
+                   
+                      <div class="col-md-3 mb-2">
+                        <label for="temp_password" class="form-label">Temporary Password <span class="mandatory">*</span></label>
+                        <input type="password" id="temp_password" name="temp_password" class="form-control" data-required="Temporary Password"/>
+                      </div>
+                    <% } %>
+                    <!-- <div class="col-md-3 form-check mt-4">
+                      <input type="checkbox" id="agreement_accepted" name="agreement_accepted" class="form-check-input" value="true" />
+                      <label for="agreement_accepted" class="form-check-label">I accept the agreement</label>
+                    </div> -->
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-3 mb-2">
+                      <label for="digital_signature" class="form-label">Digital Signature</label>
+                      <input type="file" id="digital_signature" name="digital_signature" class="form-control" />
+                      <% if (partner && partner.boutique.digital_signature) { %>
+                         <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.digital_signature %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                        <% } %>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="store_logo" class="form-label">Store Logo</label>
+                      <input type="file" id="store_logo" name="store_logo" class="form-control" />
+                       <% if (partner && partner.boutique.store_logo) { %>
+                         <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.store_logo %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                        <% } %>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="instagram" class="form-label">Instagram Page</label>
+                      <input type="url" id="instagram" name="instagram" class="form-control" value="<%= partner && partner.boutique.social_links.instagram ? partner.boutique.social_links.instagram : '' %>"/>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                      <label for="facebook" class="form-label">Facebook Page</label>
+                      <input type="url" id="facebook" name="facebook" class="form-control" value="<%= partner && partner.boutique.social_links.facebook ? partner.boutique.social_links.facebook : '' %>"/>
+                    </div>
+
+                     <div class="col-md-3 mb-2">
+                        <label for="status" class="form-label">Status <span class="mandatory">*</span></label>
+                        <select class="form-select" id="status" name="status" data-required="Status">
+                            <option value="">Select status</option>
+                            <option value="active" <% if (partner && partner.status === 'active') { %> selected <% } %>>Active</option>
+                            <option value="inactive" <% if (partner && partner.status === 'inactive') { %> selected <% } %>>Inactive</option>
+                        </select>
+                      </div>
+                      
+                  </div>
+
+        <div class="text-end">
+             <% if (partner) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Partner</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Partner</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<%- include('../layout/footer') %>
+<script>
+$(document).ready(function () {
+  $('.operating_days').select2({
+    placeholder: 'Select one or more industries',
+    allowClear: true,
+    width: '100%'
+  });
+});
+</script>
+
+<script>
+  document.getElementById('mobile').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, ''); // remove non-digits
+    if (this.value.length > 10) {
+      this.value = this.value.slice(0, 10); // max 10 digits
+    }
+  });
+</script>
+<script>
+
+  async function loadsubcategories(state_id,city_id=''){
+     let stateId = state_id; // Get selected state ID
+
+      if (stateId) {
+          try {
+              let response = await fetch(`/get-cities?state_id=${stateId}`);
+              let cities = await response.json();
+              
+              let cityDropdown = document.getElementById("city");
+              let selectedCityId = cityDropdown.dataset.selected; // Get previously selected city
+
+              cityDropdown.innerHTML = '<option value="">Select city</option>'; // Reset dropdown
+
+              cities.forEach(city => {
+                  let option = document.createElement("option");
+                  option.value = city._id;
+                  option.textContent = city.name;
+                  
+                  // Match the selected city ID and set it as selected
+                  if (selectedCityId && String(selectedCityId) === String(city._id)) {
+                      option.selected = true;
+                  }
+
+                  cityDropdown.appendChild(option);
+              });
+
+          } catch (error) {
+              console.error("Error fetching cities:", error);
+          }
+      }
+  }
+
+document.getElementById("state_id").addEventListener("change", async function() {
+    let stateId = this.value; // Get selected state ID
+    loadsubcategories(stateId);
+});
+
+
+  const preSelectedState = $('#state_id').val();
+  const preSelectedCity = $('#city').data('selected'); // Set this in HTML if available
+
+  if (preSelectedState) {
+    loadsubcategories(preSelectedState, preSelectedCity);
+  }
+
+   document.addEventListener('DOMContentLoaded', () => {
+    // Select all inputs with class 'string-only'
+    const stringInputs = document.querySelectorAll('input.string-only');
+
+    stringInputs.forEach(input => {
+      input.addEventListener('input', (e) => {
+        // Replace anything not a letter or space with ''
+        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+      });
+    });
+  });
+
+   document.addEventListener('DOMContentLoaded', () => {
+    const mobileInputs = document.querySelectorAll('input.mobile-only');
+
+    mobileInputs.forEach(input => {
+      input.addEventListener('input', (e) => {
+        // Remove any non-digit characters
+        let cleaned = e.target.value.replace(/\D/g, '');
+
+        // Limit to max 10 digits
+        if (cleaned.length > 10) {
+          cleaned = cleaned.slice(0, 10);
+        }
+
+        e.target.value = cleaned;
+      });
+    });
+  });
+
+  document.querySelectorAll('input.only-number').forEach(input => {
+  input.addEventListener('keypress', function (e) {
+    const char = String.fromCharCode(e.which);
+    if (!/[0-9]/.test(char)) {
+      e.preventDefault();
+    }
+  });
+
+  // Also prevent paste of non-numeric
+  input.addEventListener('paste', function (e) {
+    const pasteData = e.clipboardData.getData('text');
+    if (!/^\d+$/.test(pasteData)) {
+      e.preventDefault();
+    }
+  });
+});
+</script>

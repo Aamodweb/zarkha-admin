@@ -63,6 +63,37 @@
                   <option value="inactive" <% if (brands && brands.status === 'inactive') { %> selected <% } %>>Inactive</option>
               </select>
           </div>
+            <div class="col-md-12">
+              <label for="hash_tags" class="form-label">Hashtags (Optional)</label>
+              <select name="hash_tags[]" id="hash_tags" class="form-control select2" multiple>
+                <% hashtag.forEach((tag) => { %>
+                  <option value="<%= tag.id %>" 
+                    <% if (brands && Array.isArray(brands.hash_tags) && brands.hash_tags.includes(tag.id)) { %> selected <% } %>>
+                    #<%= tag.name %>
+                  </option>
+                <% }) %>
+              </select>
+              <small>Select one or more hashtags for better searchability.</small>
+            </div>
+        </div>
+        <h5>SEO Information</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label>Meta Title</label>
+            <input type="text" name="seo[meta_title]" class="form-control" value="<%= brands && brands.seo.meta_title ? brands.seo.meta_title : '' %>">
+          </div>
+          <div class="col-md-6">
+            <label>Meta Description</label>
+            <textarea name="seo[meta_description]" class="form-control"><%= brands?.seo?.meta_description || '' %></textarea>
+          </div>
+          <div class="col-md-6">
+            <label>Meta Keywords</label>
+            <input type="text" name="seo[meta_keywords]" class="form-control" value="<%= brands && brands.seo.meta_keywords ? brands.seo.meta_keywords : '' %>">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Canonical URL</label>
+            <input type="text" name="seo[canonical_url]" class="form-control" value="<%= brands && brands.seo.canonical_url ? brands.seo.canonical_url : '' %>">
+          </div>
         </div>
 
         <div class="text-end">
@@ -124,4 +155,13 @@
   }
 });
 
+</script>
+<script>
+  $(document).ready(function() {
+    $('#hash_tags').select2({
+      placeholder: "Select hashtags",
+      tags: true,
+      tokenSeparators: [',']
+    });
+  });
 </script>

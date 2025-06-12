@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const Brands = require('../models/Brands');
 const Category = require('../models/Category');
 const Industry = require('../models/Industry');
+const Hashtag = require('../models/Hashtag');
 
 const List = async(req,res)=>{
     try{
@@ -9,6 +10,7 @@ const List = async(req,res)=>{
          const brands = await Brands.find()
                                   .populate('industry_id') // this will populate the industry details
                                   .populate('category_id') // this will populate the industry details
+                                   .populate('hash_tags')
                                   .sort({ createdAt: -1 }); // optional sorting
                                   
           console.log(brands,"brands data");
@@ -26,8 +28,9 @@ const Create = async(req,res)=>{
 
           const industries = await Industry.find({ status: 'active' });
         const categorys = await Category.find({ status: 'active' });
+         const hashtag = await Hashtag.find({ status: 'active' });
 
-        res.render('brands/create', { brands,industries,categorys, message: "" });
+        res.render('brands/create', { brands,industries,categorys,hashtag, message: "" });
     }
     catch(error){
         console.log(error.message);
@@ -47,7 +50,7 @@ const slugify = (text) => {
 
 const Store = async (req, res) => {
   try {
-    const { id, name,industry_id,category_id, description, status } = req.body;
+    const { id, name,industry_id,category_id, description, status,hash_tags } = req.body;
 
     const slug = slugify(name);
 
@@ -92,6 +95,12 @@ const Store = async (req, res) => {
           slug,
           description,
           status,
+          seo: req.body.seo,
+          hash_tags: Array.isArray(hash_tags)
+                    ? hash_tags
+                    : typeof hash_tags === 'string' && hash_tags.trim() !== ''
+                      ? [hash_tags]
+                      : [],
         };
 
         // Only update image if new one uploaded
@@ -119,6 +128,12 @@ const Store = async (req, res) => {
         image: brands_image, // Use the new image path
         description,
         status: status,
+        seo: req.body.seo,
+        hash_tags: Array.isArray(hash_tags)
+                  ? hash_tags
+                  : typeof hash_tags === 'string' && hash_tags.trim() !== ''
+                    ? [hash_tags]
+                    : [],
         // image: req.file?.filename || null // Optional if handling images
       });
 
@@ -149,12 +164,12 @@ const Edit = async (req, res) => {
         const brands = await Brands.findById(BrandsId);
 
            const industries = await Industry.find({ status: 'active' });
-
+          const hashtag = await Hashtag.find({ status: 'active' });
         console.log(brands,"brands data");
         if (!brands) {
               return res.redirect('/brands');
         }
-          res.render('brands/create', { brands,industries, message: "" });
+          res.render('brands/create', { brands,industries,hashtag, message: "" });
 
     }
     catch (error) {

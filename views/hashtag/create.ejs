@@ -1,0 +1,52 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (hashtag) { %>
+             <span>Edit Hashtag</span>
+        <% } else { %>
+             <span>Create Hashtag</span>
+        <% } %>
+      <a href="/hashtag" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/hashtag/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (hashtag) { %>
+            <input type="hidden" name="id" value="<%= hashtag.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" name="name" value="<%= hashtag && hashtag.name ? hashtag.name : '' %>"  placeholder="Enter Hashtag" required>
+            </div>
+            <div class="col-md-6">
+              <label for="description" class="form-label">Description</label>
+              <textarea name="description" id="description" class="form-control" rows="4" placeholder="Enter description here..."><%= hashtag && hashtag.description ? hashtag.description : '' %></textarea>
+            </div>
+            <div class="col-md-6">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="">Select status</option>
+                    <option value="active" <% if (hashtag && hashtag.status === 'active') { %> selected <% } %>>Active</option>
+                    <option value="inactive" <% if (hashtag && hashtag.status === 'inactive') { %> selected <% } %>>Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="text-end">
+             <% if (hashtag) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Hashtag</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Hashtag</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,163 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Partner List</h2>
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search partner..."
+              aria-label="Search partner"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/partner/create" class="btn btn-add btn-primary">+ Add New Partner</a>
+           </div>
+        </div>
+      </div>
+      
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Role</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>State</th>
+                <th>City</th>
+                <th>Status</th>
+                <th>Created AT</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (partner_list && partner_list.length > 0) { %>
+                <% partner_list.forEach((partner, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= partner.role %></td>
+                    <td><%= partner.name %></td>
+                    <td><%= partner.email %></td>
+                    <td><%= partner.mobile %></td>
+                    <td><%= partner.state_id %></td>
+                    <td><%= partner.city_id %></td>
+                    <td>
+                      <% if (partner.status === 'active') { %>
+                        <span class="status active"><%= partner.status %></span>
+                        <% } else { %>
+                        <span class="status inactive"><%= partner.status %></span> 
+                        <% } %>
+                    </td>
+                    <td><%= partner.created_at %></td>
+                    <td>
+                        <a href="<%= BASE_URL %>/partner/view/<%= partner.id %>" class="action-btn edit" title="Edit"><i class="fas fa-eye"></i></a>
+                        <a href="<%= BASE_URL %>/partner/edit/<%= partner.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/partner/delete/<%= partner.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                        <a href="javascript:void(0);" data-id="<%= partner.id %>" class="action-btn updatecreditonal" title="Update CRM Creditional"><i class="fa fa-key" aria-hidden="true"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="10">No data found</td></tr>
+                <% } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- Update CRM Credentials Modal -->
+<div class="modal fade" id="updateCrmModal" tabindex="-1" aria-labelledby="updateCrmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="updateCrmForm" method="POST" action="/partner/update-credentials">
+      <input type="hidden" name="partner_id" id="partner_id">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update CRM Login Credentials</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="dashboard_email" class="form-label">Login Email</label>
+            <input type="email" class="form-control" id="dashboard_email" name="dashboard_email" required>
+          </div>
+          <div class="mb-3">
+            <label for="dashboard_password" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="dashboard_password" name="dashboard_password">
+          </div>
+          <small class="text-muted">Leave password blank to keep it unchanged.</small>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<%- include('../layout/footer') %>
+<script>
+  $(document).on('click', '.updatecreditonal', function () {
+    const partnerId = $(this).data('id');
+    
+    // Fetch partner data via AJAX (optional, or you can set email directly if available)
+    $.get(`/partner/get/${partnerId}`, function (data) {
+      if (data) {
+        $('#partner_id').val(data._id);
+        $('#dashboard_email').val(data.dashboard_email || '');
+        $('#dashboard_password').val('');
+        $('#updateCrmModal').modal('show');
+      }
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    $('#updateCrmForm').submit(function (e) {
+      e.preventDefault();
+
+      const formData = $(this).serialize();
+      $.ajax({
+        type: 'POST',
+        url: '/partner/update-credentials',
+        data: formData,
+        success: function (res) {
+          if (res.status) {
+             successMsg('Successfully', res.message);
+
+            // Close modal after short delay
+            setTimeout(() => {
+              $('#updateCrmModal').modal('hide');
+            }, 1000);
+          } else {
+            errorMsg('Successfully', "Something went wrong");
+          }
+        },
+        error: function () {
+            errorMsg('Successfully', "Something went wrong");
+        }
+      });
+    });
+  });
+</script>
+
+

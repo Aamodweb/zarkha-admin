@@ -28,7 +28,14 @@ const CategorySchema = new mongoose.Schema({
   status: {
     type: String,
     default: 'active'
-  }
+  },
+  seo: {
+  meta_title: String,
+  meta_description: String,
+  meta_keywords: String,
+  canonical_url: String,
+},
+hash_tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Hashtag' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Category', CategorySchema);

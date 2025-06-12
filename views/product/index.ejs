@@ -53,7 +53,15 @@
                       <td><%= product.subcategory_id ? product.subcategory_id.name : '' %></td>
                       <td><%= product.name %></td>
                       <td><%= product.variants.length %></td>
-                      <td><%= product.product_tags %></td>
+                      <td>
+                        <% if (product.product_tags && product.product_tags.length) { %>
+                          <% product.product_tags.forEach(tag => { %>
+                            <span class="badge bg-secondary">#<%= tag.name %></span>
+                          <% }) %>
+                        <% } else { %>
+                          N/A
+                        <% } %>
+                      </td>
                       <td>
                         <% if (product.status === 'active') { %>
                           <span class="status active"><%= product.status %></span>

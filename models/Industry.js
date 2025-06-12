@@ -16,7 +16,14 @@ const IndustrySchema = new mongoose.Schema({
   created_at: {
     type: Date,
     default: Date.now
-  }
+  },
+   seo: {
+      meta_title: String,
+      meta_description: String,
+      meta_keywords: String,
+      canonical_url: String,
+    },
+    hash_tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Hashtag' }],
 });
 
 module.exports = mongoose.model('Industry', IndustrySchema);

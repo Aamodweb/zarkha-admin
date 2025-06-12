@@ -1,0 +1,216 @@
+<%- include('../layout/header') %>
+<style>
+    .product_details {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product_details h4, 
+.product_details h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.product_details p {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.product_details .badge {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.product_details .badge.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.product_details .badge.inactive {
+  background-color: #dc3545;
+  color: white;
+}
+
+.product_details img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.product_details .list-group-item {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.product_details .btn {
+  margin-right: 10px;
+}
+
+.product_description {
+  max-height: 250px;         /* Set maximum height */
+  overflow-y: auto;          /* Enable vertical scroll if needed */
+  background: #f8f9fa;       /* Light background for readability */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.product_description ul,
+.product_description ol {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.product_description p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.product_description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product_description::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.product_description::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+</style>
+<div class="content">
+   <div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Partner Details</h4>
+        </div>
+            <div class="card-body partner_details">
+              <div class="row">
+                <!-- Partner Info -->
+                <div class="col-md-6 col-sm-12 mb-3">
+                  <p><strong>Name:</strong> <%= partner.name %></p>
+                  <p><strong>Owner/Proprietor:</strong> <%= partner.boutique?.proprietor_name || 'N/A' %></p>
+                  <p><strong>Business Type:</strong> <%= partner.boutique?.business_type || 'N/A' %></p>
+                  <p><strong>Mobile:</strong> <%= partner.mobile || 'N/A' %></p>
+                  <p><strong>WhatsApp:</strong> <%= partner.whatsapp || 'N/A' %></p>
+                  <p><strong>Email:</strong> <%= partner.email || 'N/A' %></p>
+                </div>
+
+                <!-- KYC & Documents -->
+                <div class="col-md-6 col-sm-12 mb-3">
+                  <p><strong>GST No:</strong> <%= partner.boutique?.gst_number || 'N/A' %></p>
+                  <p><strong>PAN No:</strong> <%= partner.boutique?.pan_number || 'N/A' %></p>
+                  <p><strong>Document Type:</strong> <%= partner.boutique?.document_type || 'N/A' %></p>
+                  <p><strong>Document Front Image:</strong><br>
+                     <% if (partner.boutique?.document_front) { %>
+                      <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique?.document_front %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                    <% } else { %> N/A <% } %>
+
+                  <p><strong>Document Back Image:</strong><br>
+                  <% if (partner.boutique?.document_back) { %>
+                    <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique?.document_back %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                  <% } else { %> N/A <% } %>
+
+                  <p><strong>Registration Certificate:</strong><br>
+                    <% if (partner.boutique?.registration_certificate) { %>
+                      <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.registration_certificate %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                    <% } else { %> N/A <% } %>
+                  </p>
+                  <p><strong>Store Logo:</strong><br>
+                    <% if (partner.boutique?.store_logo) { %>
+                      <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.store_logo %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                    <% } else { %> N/A <% } %>
+                  </p>
+                </div>
+
+                <!-- Bank Details -->
+                <div class="col-md-6 col-sm-12 mb-3">
+                  <h5>Bank Details</h5>
+                  <p><strong>Account Holder:</strong> <%= partner.bank_account_holder || 'N/A' %></p>
+                  <p><strong>Account Number:</strong> <%= partner.bank_account_number || 'N/A' %></p>
+                  <p><strong>IFSC:</strong> <%= partner.ifsc_code || 'N/A' %></p>
+                  <p><strong>Bank Name:</strong> <%= partner.bank_name || 'N/A' %></p>
+                  <p><strong>UPI ID:</strong> <%= partner.upi_id || 'N/A' %></p>
+                  <p><strong>Cancelled Cheque / Passbook:</strong><br>
+                    <% if (partner.cheque_or_passbook) { %>
+                      <img src="<%= BASE_URL %>/uploads/partner/<%= partner.cheque_or_passbook %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                    <% } else { %> N/A <% } %>
+                  </p>
+                </div>
+
+                <!-- Address -->
+                <div class="col-md-6 col-sm-12 mb-3">
+                  <h5>Pickup Address</h5>
+                  <p><strong>Store Name:</strong> <%= partner.store_name || 'N/A' %></p>
+                  <p><strong>Address Line 1:</strong> <%= partner.pickup_address_1 || 'N/A' %></p>
+                  <p><strong>Address Line 2:</strong> <%= partner.pickup_address_2 || 'N/A' %></p>
+                  <p><strong>City:</strong> <%= partner.city || 'N/A' %></p>
+                  <p><strong>State:</strong> <%= partner.state || 'N/A' %></p>
+                  <p><strong>Pincode:</strong> <%= partner.pincode || 'N/A' %></p>
+                  <p><strong>Contact Person:</strong> <%= partner.pickup_contact_person || 'N/A' %></p>
+                  <p><strong>Phone:</strong> <%= partner.pickup_phone || 'N/A' %></p>
+                </div>
+
+                <!-- Boutique Settings -->
+                <div class="col-md-6 col-sm-12 mb-3">
+                  <h5>Boutique Settings</h5>
+                  <p><strong>Has Inventory:</strong> <%= partner.boutique?.has_inventory ? 'Yes' : 'No' %></p>
+                  <p><strong>Source from Zarkha:</strong> <%= partner.boutique?.source_from_zarkha ? 'Yes' : 'No' %></p>
+                  <p><strong>Margin %:</strong> <%= partner.boutique?.margin_percent || 'N/A' %></p>
+                  <p><strong>Self Pricing:</strong> <%= partner.boutique?.self_pricing_enabled ? 'Yes' : 'No' %></p>
+                  <p><strong>Return Policy:</strong> <%= partner.boutique?.return_policy || 'N/A' %></p>
+                  <p><strong>Delivery Preference:</strong> <%= partner.boutique?.delivery_partner_preference || 'N/A' %></p>
+                  <p><strong>Working Days:</strong> <%= partner.boutique?.operating_days?.join(', ') || 'N/A' %></p>
+                  <p><strong>Working Hours:</strong> <%= partner.boutique?.working_hours?.start || '' %> - <%= partner.boutique?.working_hours?.end || '' %></p>
+                  <p><strong>Custom Branding:</strong> <%= partner.boutique?.custom_branding_enabled ? 'Yes' : 'No' %></p>
+                </div>
+
+                <!-- Digital Agreement -->
+                <div class="col-md-6 col-sm-12 mb-3">
+                  <h5>Digital Agreement</h5>
+                  <p><strong>Dashboard Access Email:</strong> <%= partner.dashboard_email || 'N/A' %></p>
+                  <p><strong>Agreement Accepted:</strong> <%= partner.boutique?.agreement_accepted ? 'Yes' : 'No' %></p>
+                  <p><strong>Digital Signature:</strong><br>
+                    <% if (partner.boutique?.digital_signature) { %>
+                      <img src="<%= BASE_URL %>/uploads/partner/<%= partner.boutique.digital_signature %>" class="img-thumbnail mt-2" style="max-width: 10%;">
+                    <% } else { %> N/A <% } %>
+                  </p>
+                  <p><strong>Instagram:</strong> <%= partner.boutique?.social_links?.instagram || 'N/A' %></p>
+                  <p><strong>Facebook:</strong> <%= partner.boutique?.social_links?.facebook || 'N/A' %></p>
+                </div>
+
+                <!-- Status and Actions -->
+                <div class="col-12 mt-3">
+                  <p><strong>Status:</strong>
+                    <% if (partner.status === 'active') { %>
+                      <span class="badge bg-success text-capitalize">Active</span>
+                    <% } else { %>
+                      <span class="badge bg-danger text-capitalize">Inactive</span>
+                    <% } %>
+                  </p>
+
+                  <hr>
+
+                  <div class="mt-3 d-flex flex-wrap gap-2">
+                    <a href="<%= BASE_URL %>/partner/edit/<%= partner.id %>" class="btn btn-primary">Edit Partner</a>
+                    <a href="<%= BASE_URL %>/partner" class="btn btn-secondary">Back to List</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+</div>
+
+<%- include('../layout/footer') %>

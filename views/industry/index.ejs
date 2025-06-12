@@ -37,6 +37,7 @@
                   <th>Name</th>
                   <th>Description</th>
                   <th>Status</th>
+                  <th>Hashtag</th>
                   <th>Action</th>
             </tr>
           </thead>
@@ -53,6 +54,15 @@
                           <% } else { %>
                           <span class="status inactive"><%= industry.status %></span> 
                           <% } %>
+                      </td>
+                       <td>
+                        <% if (industry.hash_tags && industry.hash_tags.length) { %>
+                          <% industry.hash_tags.forEach(tag => { %>
+                            <span class="badge bg-secondary">#<%= tag.name %></span>
+                          <% }) %>
+                        <% } else { %>
+                          N/A
+                        <% } %>
                       </td>
                       <td>
                           <a href="<%= BASE_URL %>/industry/edit/<%= industry.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
