@@ -11,6 +11,9 @@ const List = async(req,res)=>{
     try{
         // Fetch all admin users from the collection
          const partner_list = await Partner.find()
+                                   .populate('state_id') 
+                                   .populate('city_id') 
+                                   .populate('created_by') 
                                   .sort({ createdAt: -1 }); // optional sorting
 
 
