@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const Industry = require('../models/Industry');
 const jwt = require('jsonwebtoken');
+const XLSX = require('xlsx');
 const Hashtag = require('../models/Hashtag');
 
 const List = async(req,res)=>{
@@ -155,4 +156,49 @@ const Delete = async (req, res) => {
 
 }
 
-module.exports = {List,Create,Store,Edit,Delete};
+const IndustryExport = async (req, res) => {
+  try {
+    const industries = await Industry.find()
+      .populate('hash_tags') // if hashtags are stored as ObjectIds
+      .lean();
+
+    if (!industries || industries.length === 0) {
+      return res.status(404).send('No industries found to export.');
+    }
+
+    // Prepare export data
+      const exportData = industries.map((industry, index) => ({
+      SNo: index + 1,
+      Name: industry.name || '',
+      Slug: industry.slug || '',
+      Status: industry.status || 'inactive',
+      Hashtags: (industry.hash_tags || []).map(ht => ht.name).join(', '),
+      meta_title: industry.seo?.meta_title || '',
+      meta_description: industry.seo?.meta_description || '',
+      meta_keyword: industry.seo?.meta_keyword || '',
+      canonical_url: industry.seo?.canonical_url || '',
+      CreatedAt: industry.created_at ? new Date(industry.created_at).toLocaleString() : '',
+    }));
+
+
+    // Convert to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Industries');
+
+    // Write to buffer
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Send response
+    res.setHeader('Content-Disposition', 'attachment; filename="industry_export.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    return res.send(buffer);
+
+  } catch (error) {
+    console.error('Industry export error:', error);
+    return res.status(500).send('Failed to export industries.');
+  }
+};
+
+module.exports = {List,Create,Store,Edit,Delete,IndustryExport};
+

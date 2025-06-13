@@ -374,5 +374,9 @@ const Delete = async (req, res) => {
     }
 
 }
+const ProductBulkImport = async(req, res) => {
 
-module.exports = {List,Create,Store,Edit,View,Delete,ProductImageDelete};
+       res.render('product/bulk-import', {message: "" });
+}
+
+module.exports = {List,Create,Store,Edit,View,Delete,ProductImageDelete,ProductBulkImport};

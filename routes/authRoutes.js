@@ -25,6 +25,8 @@ const stateController = require('../controllers/StateController');
 const cityController = require('../controllers/CityController');
 const countryController = require('../controllers/CountriesController');
 const HashtagController = require('../controllers/HashtagController');
+const BannerController = require('../controllers/BannerController');
+const CouponController = require('../controllers/CouponController');
 
 // Routes
 router.get('/',redirectIfAuthenticated, authController.login);
@@ -49,6 +51,7 @@ router.get('/industry/create',authMiddleware, industryController.Create);
 router.post('/industry/store',authMiddleware,upload.none(), industryController.Store);
 router.get('/industry/edit/:id',authMiddleware, industryController.Edit);
 router.get('/industry/delete/:id',authMiddleware, industryController.Delete);
+router.get('/industry/export',authMiddleware, industryController.IndustryExport);
 
 
 const categoryUploadPath = 'uploads/category/';
@@ -115,6 +118,7 @@ router.get('/product/view/:id',authMiddleware, productController.View);
 router.get('/product/edit/:id',authMiddleware, productController.Edit);
 router.get('/product/delete/:id',authMiddleware, productController.Delete);
 router.post('/product/image/delete/',authMiddleware,upload.none(), productController.ProductImageDelete);
+router.get('/product/bulk-import/',authMiddleware, productController.ProductBulkImport);
 
 
 const manufactureUploadPath = 'uploads/manufacture/';
@@ -196,6 +200,34 @@ router.post('/hashtag/store',authMiddleware,upload.none(),HashtagController.Stor
 router.get('/hashtag/edit/:id',authMiddleware, HashtagController.Edit);
 router.get('/hashtag/delete/:id',authMiddleware, HashtagController.Delete);
 
+const bannerUploadPath = 'uploads/banner/';
+const  bannerStorage = setupStorage(bannerUploadPath);
+const bannerUpload = multer({ storage: bannerStorage });
+
+//banner module 
+router.get('/banner',authMiddleware, BannerController.List);
+router.get('/banner/create',authMiddleware, BannerController.Create);
+router.post('/banner/store',authMiddleware,bannerUpload.fields([
+    { name: 'image', maxCount: 1 },
+  ]),BannerController.Store);
+router.get('/banner/edit/:id',authMiddleware, BannerController.Edit);
+router.get('/banner/delete/:id',authMiddleware, BannerController.Delete);
+
+
+const couponUploadPath = 'uploads/coupon/';
+const  couponStorage = setupStorage(couponUploadPath);
+const couponUpload = multer({ storage: couponStorage });
+
+// Coupon module 
+router.get('/coupon',authMiddleware, CouponController.List);
+router.get('/coupon/create',authMiddleware, CouponController.Create);
+router.post('/coupon/store',authMiddleware,couponUpload.fields([
+    { name: 'image', maxCount: 1 },
+  ]),CouponController.Store);
+router.get('/coupon/edit/:id',authMiddleware, CouponController.Edit);
+router.get('/coupon/delete/:id',authMiddleware, CouponController.Delete);
+router.get('/coupon/get-applicables/:type',authMiddleware, CouponController.GetApplicables);
+router.get('/coupon/view/:id',authMiddleware, CouponController.View);
 
 router.get('/logout', (req, res) => {
   res.clearCookie('access_token');

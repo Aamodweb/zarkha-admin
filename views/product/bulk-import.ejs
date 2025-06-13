@@ -1,0 +1,198 @@
+<%- include('../layout/header') %>
+<style>
+    .product_details {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product_details h4, 
+.product_details h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.product_details p {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.product_details .badge {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.product_details .badge.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.product_details .badge.inactive {
+  background-color: #dc3545;
+  color: white;
+}
+
+.product_details img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.product_details .list-group-item {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.product_details .btn {
+  margin-right: 10px;
+}
+
+.product_description {
+  max-height: 250px;         /* Set maximum height */
+  overflow-y: auto;          /* Enable vertical scroll if needed */
+  background: #f8f9fa;       /* Light background for readability */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.product_description ul,
+.product_description ol {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.product_description p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.product_description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product_description::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.product_description::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+</style>
+<div class="content">
+  <div class="container mt-4">
+    <div class="card">
+      <div class="card-header">
+        <h4>Bulk Import Products</h4>
+      </div>
+
+      <div class="card-body product_details">
+        <!-- Instructions -->
+        <h5 class="mb-3">Steps to Bulk Import Products</h5>
+        <ol class="mb-4">
+          <li>Download reference CSV files (Industry, Category, Subcategory, Brand) using the buttons below. These files contain Object IDs required in the product CSV.</li>
+          <li>Download the sample product CSV template.</li>
+          <li>Fill in the product details in the template. Use the correct ObjectIDs from the reference files.</li>
+          <li>Upload the completed CSV using the form below.</li>
+        </ol>
+
+        <!-- Reference CSV Downloads -->
+        <div class="mb-4">
+          <h5>Download Reference CSV Files</h5>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="<%= BASE_URL %>/export/industry-csv" class="btn btn-outline-primary btn-sm">Industry CSV</a>
+            <a href="<%= BASE_URL %>/export/category-csv" class="btn btn-outline-primary btn-sm">Category CSV</a>
+            <a href="<%= BASE_URL %>/export/subcategory-csv" class="btn btn-outline-primary btn-sm">Subcategory CSV</a>
+            <a href="<%= BASE_URL %>/export/brand-csv" class="btn btn-outline-primary btn-sm">Brand CSV</a>
+          </div>
+        </div>
+
+        <!-- Sample File Download -->
+        <div class="mb-4">
+          <h5>Download Sample Product CSV</h5>
+          <a href="<%= BASE_URL %>/uploads/sample-product-csv.xlsx" class="btn btn-success btn-sm">Download Sample CSV</a>
+        </div>
+
+        <!-- CSV Column Explanation -->
+        <div class="mb-4">
+          <h5>Explanation of Columns (in sample CSV)</h5>
+          <ul>
+            <li><strong>industry_id</strong> – ObjectID of the Industry (from reference file)</li>
+            <li><strong>category_id</strong> – ObjectID of the Category</li>
+            <li><strong>subcategory_id</strong> – ObjectID of the Subcategory (optional)</li>
+            <li><strong>brand_id</strong> – ObjectID of the Brand (optional)</li>
+            <li><strong>name</strong> – Product Name</li>
+            <li><strong>description</strong> – Product Description</li>
+            <li><strong>image_type</strong> – ‘color’ or ‘general’</li>
+            <li><strong>color_images</strong> – JSON array:
+              <ul>
+                <li>If <code>image_type = color</code>:  
+                  <pre>[{ "color": "#FF0000", "image": "https://drive.google.com/file/d/xxx/view" }]</pre>
+                </li>
+                <li>If <code>image_type = general</code>:  
+                  <pre>[{ "image": "https://drive.google.com/file/d/xxx/view" }]</pre>
+                </li>
+              </ul>
+            </li>
+            <li><strong>has_variants</strong> – ‘yes’ or ‘no’</li>
+            <li><strong>variants</strong> – JSON array:
+              <ul>
+                <li>If <code>has_variants = yes</code>:  
+                  <pre>[
+          {
+            "SKU":"ABC123",
+            "attribute_type": "size",
+            "attribute_value": "L",
+            "price": 1000,
+            "discount_price": 500,
+            "stock": 25
+          }
+        ]</pre>
+                </li>
+                <li>If <code>has_variants = no</code>:  
+                  <pre>[
+          {
+            "SKU":"ABC123",
+            "price": 1000,
+            "discount_price": 500,
+            "stock": 25
+          }
+        ]</pre>
+                </li>
+              </ul>
+            </li>
+            <li><strong>return_allowed</strong> – ‘yes’ or ‘no’</li>
+            <li><strong>return_notes</strong> – Notes about return policy</li>
+            <li><strong>seo_title</strong> – For SEO title</li>
+            <li><strong>seo_description</strong> – For SEO meta description</li>
+            <li><strong>product_tags</strong> – Comma-separated ObjectIDs of product hashtags</li>
+            <li><strong>status</strong> – ‘active’ or ‘inactive’</li>
+          </ul>
+        </div>
+
+
+        <!-- Upload Form -->
+        <form action="/product/import" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="csv_file" class="form-label">Upload Product CSV</label>
+            <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Import Products</button>
+        </form>
+      </div>
+    </div>
+
+
+<%- include('../layout/footer') %>

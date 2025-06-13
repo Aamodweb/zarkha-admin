@@ -1,0 +1,183 @@
+<%- include('../layout/header') %>
+<style>
+    .product_details {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.product_details h4, 
+.product_details h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.product_details p {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #555;
+}
+
+.product_details .badge {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.product_details .badge.active {
+  background-color: #28a745;
+  color: white;
+}
+
+.product_details .badge.inactive {
+  background-color: #dc3545;
+  color: white;
+}
+
+.product_details img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.product_details .list-group-item {
+  border: 1px solid #eee;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.product_details .btn {
+  margin-right: 10px;
+}
+
+.product_description {
+  max-height: 250px;         /* Set maximum height */
+  overflow-y: auto;          /* Enable vertical scroll if needed */
+  background: #f8f9fa;       /* Light background for readability */
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.product_description ul,
+.product_description ol {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.product_description p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.product_description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product_description::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.product_description::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+</style>
+<div class="content">
+  <div class="container mt-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Coupon Details</h4>
+      </div>
+      <div class="card-body">
+        
+        <!-- Coupon Summary -->
+        <table class="table table-bordered table-striped mb-4">
+          <tbody>
+            <tr>
+              <th style="width: 30%;">Code</th>
+              <td><strong><%= coupon.code %></strong></td>
+            </tr>
+            <tr>
+              <th>Description</th>
+              <td><%= coupon.description || 'N/A' %></td>
+            </tr>
+            <tr>
+              <th>Discount Type</th>
+              <td><%= coupon.discount_type === 'flat' ? 'Flat ₹' + coupon.discount_value : coupon.discount_value + '% Off' %></td>
+            </tr>
+            <% if (coupon.discount_type === 'percent') { %>
+              <tr>
+                <th>Max Discount Amount</th>
+                <td>₹<%= coupon.max_discount_amount || 'N/A' %></td>
+              </tr>
+            <% } %>
+            <tr>
+              <th>Minimum Order Amount</th>
+              <td>₹<%= coupon.min_order_amount || '0' %></td>
+            </tr>
+            <tr>
+              <th>Usage Limit</th>
+              <td><%= coupon.usage_limit || 'Unlimited' %></td>
+            </tr>
+            <tr>
+              <th>Valid From</th>
+              <td><%= coupon.start_date ? new Date(coupon.start_date).toLocaleDateString() : 'N/A' %></td>
+            </tr>
+            <tr>
+              <th>Valid Till</th>
+              <td><%= coupon.end_date ? new Date(coupon.end_date).toLocaleDateString() : 'N/A' %></td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <% if (coupon.status === 'active') { %>
+                  <span class="badge bg-success px-3 py-1">Active</span>
+                <% } else { %>
+                  <span class="badge bg-danger px-3 py-1">Inactive</span>
+                <% } %>
+              </td>
+            </tr>
+            <tr>
+              <th>Apply Scope</th>
+              <td><%= coupon.apply_scope === 'all' ? 'All Items' : 'Specific Items' %></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <% if (coupon.apply_scope === 'specific' && coupon.applicable_to?.length > 0) { %>
+          <!-- Specific Applicability -->
+          <h5 class="mt-4">Applicable To</h5>
+          <% coupon.applicable_to.forEach(type => { %>
+            <% const items = coupon.applicable_ids[type] || []; %>
+            <% if (items.length > 0) { %>
+              <div class="mb-3">
+                <label><strong><%= type.charAt(0).toUpperCase() + type.slice(1) %> List</strong></label>
+                <ul class="list-group">
+                  <% items.forEach(item => { %>
+                    <li class="list-group-item">
+                      <%= item.name || item.title || item.email || 'N/A' %>
+                    </li>
+                  <% }) %>
+                </ul>
+              </div>
+            <% } %>
+          <% }) %>
+        <% } %>
+
+        <!-- Actions -->
+        <div class="text-end mt-4">
+          <a href="<%= BASE_URL %>/coupon/edit/<%= coupon._id %>" class="btn btn-warning me-2">Edit Coupon</a>
+          <a href="<%= BASE_URL %>/coupon" class="btn btn-secondary">Back to List</a>
+        </div>
+      </div>
+    </div>
+<%- include('../layout/footer') %>

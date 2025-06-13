@@ -1,0 +1,275 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (coupon) { %>
+             <span>Edit Coupon</span>
+        <% } else { %>
+             <span>Create Coupon</span>
+        <% } %>
+      <a href="/coupon" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/coupon/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (coupon) { %>
+            <input type="hidden" name="id" value="<%= coupon._id %>">
+          <% } %>
+
+          <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+              <label for="code" class="form-label">Coupon Code <span class="mandatory">*</span></label>
+              <input type="text" name="code" id="code" class="form-control" data-required="Coupon Code"
+                    value="<%= coupon ? coupon.code : '' %>" placeholder="e.g., SAVE20">
+            </div>
+
+            <div class="col-md-4 mb-2">
+              <label for="discount_type" class="form-label">Discount Type <span class="mandatory">*</span></label>
+              <select name="discount_type" id="discount_type" class="form-control" data-required="Discount Type">
+                <option value="">Select</option>
+                <option value="percentage" <%= coupon && coupon.discount_type === 'percentage' ? 'selected' : '' %>>Percentage</option>
+                <option value="fixed" <%= coupon && coupon.discount_type === 'fixed' ? 'selected' : '' %>>Fixed</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label for="discount_value" class="form-label">Discount Value <span class="mandatory">*</span></label>
+              <input type="number" name="discount_value" id="discount_value" class="form-control" data-required="Discount Value"
+                    value="<%= coupon ? coupon.discount_value : '' %>">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+              <label for="max_discount_amount" class="form-label">Max Discount Amount (for % type)</label>
+              <input type="number" name="max_discount_amount" id="max_discount_amount" class="form-control"
+                    value="<%= coupon ? coupon.max_discount_amount : '' %>">
+            </div>
+
+            <div class="col-md-4 mb-2">
+              <label for="min_cart_value" class="form-label">Minimum Cart Value <span class="mandatory">*</span></label>
+              <input type="number" name="min_cart_value" id="min_cart_value" class="form-control" data-required="Minimum Cart Value"
+                    value="<%= coupon ? coupon.min_cart_value : '' %>">
+            </div>
+            <div class="col-md-4 mb-2">
+              <label for="max_uses" class="form-label">Total Usage Limit <span class="mandatory">*</span></label>
+              <input type="number" name="max_uses" id="max_uses" class="form-control"
+                    value="<%= coupon ? coupon.max_uses : 1 %>" data-required="Total Usage Limit">
+            </div>
+            <div class="col-md-4 mb-2">
+              <label for="max_uses_per_user" class="form-label">Per User Usage Limit <span class="mandatory">*</span></label>
+              <input type="number" name="max_uses_per_user" id="max_uses_per_user" class="form-control"
+                    value="<%= coupon ? coupon.max_uses_per_user : 1 %>" data-required="Per User Usage Limit">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+             <div class="col-md-12 mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea name="description" id="description" class="form-control" rows="3" placeholder="Short details"><%= coupon ? coupon.description : '' %></textarea>
+            </div>
+           <!-- Apply Scope (All / Specific) -->
+            <!-- Hidden div to store coupon data -->
+              <div id="couponData"
+                  data-is-edit="<%= coupon ? 'true' : 'false' %>"
+                  data-apply-scope="<%= coupon ? coupon.apply_scope : '' %>"
+                  data-applicable-to='<%= JSON.stringify(coupon?.applicable_to || []) %>'
+                  data-product-ids='<%= JSON.stringify(coupon?.applicable_ids.product || []) %>'
+                  data-category-ids='<%= JSON.stringify(coupon?.applicable_ids.category || []) %>'
+                  data-brand-ids='<%= JSON.stringify(coupon?.applicable_ids.brand || []) %>'>
+              </div>
+
+              <!-- Your form starts here -->
+              <div class="mb-3">
+                <label class="form-label">Apply Coupon To <span class="mandatory">*</span></label>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="apply_scope" id="apply_all" <%= coupon && coupon.apply_scope === 'all' ? 'checked' : '' %> value="all">
+                  <label class="form-check-label" for="apply_all">All Items</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="apply_scope" id="apply_specific" <%= coupon && coupon.apply_scope === 'specific' ? 'checked' : '' %> value="specific">
+                  <label class="form-check-label" for="apply_specific">Specific (Category/Product/Brand)</label>
+                </div>
+              </div>
+
+              <div id="applicable_to_wrapper" class="mb-3" style="display: none;">
+                <label class="form-label">Applicable To <span class="text-danger">*</span></label>
+                <select id="applicable_to" name="applicable_to[]" multiple class="form-control select2">
+                  <option value="category">Category</option>
+                  <option value="product">Product</option>
+                  <option value="brand">Brand</option>
+                </select>
+              </div>
+
+              <div id="applicableDynamicFields"></div>
+
+
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6 mb-2">
+              <label for="start_date" class="form-label">Start Date</label>
+              <input type="date" name="start_date" id="start_date" class="form-control"
+                    value="<%= coupon ? coupon.start_date?.toISOString().substring(0,10) : '' %>">
+            </div>
+
+            <div class="col-md-6 mb-2">
+              <label for="end_date" class="form-label">End Date <span class="mandatory">*</span></label>
+              <input type="date" name="end_date" id="end_date" class="form-control" required
+                    value="<%= coupon ? coupon.end_date?.toISOString().substring(0,10) : '' %>">
+            </div>
+
+            <div class="col-md-6 mb-2">
+              <label for="Image" class="form-label">Coupon Image</label>
+                <input type="file" class="form-control" id="image" name="image" value="">
+                <% if (coupon && coupon.image) { %>
+                  <img src="<%= BASE_URL%>/uploads/coupon/<%= coupon.image %>" alt="Coupon Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+                <% }%>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label for="Status" class="form-label">Status <span class="mandatory">*</span></label>
+                <select name="status" id="status" class="form-control">
+                  <option value="active" <%= coupon && coupon.status === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="inactive" <%= coupon && coupon.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                  <option value="expired" <%= coupon && coupon.status === 'expired' ? 'selected' : '' %>>Expired</option>
+                </select>
+            </div>
+
+          </div>
+
+        <div class="text-end">
+             <% if (coupon) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Coupon</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Coupon</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>
+
+
+<script>
+  $(document).ready(function() {
+    $('#applicable_to').select2({
+      placeholder: "Select",
+      width: '100%',
+      tags: true,
+      tokenSeparators: [',']
+    });
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    const $data = $('#couponData');
+
+    const isEdit = $data.data('is-edit') === true || $data.data('is-edit') === 'true';
+    const applyScope = $data.data('apply-scope');
+    const applicableTo = $data.data('applicable-to') || [];
+
+    const prefilledData = {
+      product: $data.data('product-ids') || [],
+      category: $data.data('category-ids') || [],
+      brand: $data.data('brand-ids') || []
+    };
+
+    let previousSelectedTypes = [...applicableTo]; // Track previous selected types
+
+    function toggleApplicableToFields() {
+      const scope = $('input[name="apply_scope"]:checked').val();
+      if (scope === 'all') {
+        $('#applicable_to_wrapper').hide();
+        $('#applicableDynamicFields').html(`
+          <input type="hidden" name="apply_to_all" value="1" />
+          <div class="alert alert-info">Coupon will be applied to <strong>all products/categories/brands</strong>.</div>
+        `);
+      } else {
+        $('#applicable_to_wrapper').show();
+        if (!isEdit) {
+          $('#applicableDynamicFields').empty();
+        }
+      }
+    }
+
+    function fetchAndRenderApplicableBlock(type, selectedIds = []) {
+      // Check if already rendered
+      if ($('#applicable_field_' + type).length) return;
+
+      $.ajax({
+        url: `/coupon/get-applicables/${type}`,
+        method: 'GET',
+        success: function (res) {
+          if (res.status && Array.isArray(res.data)) {
+            const optionsHtml = res.data.map(item => {
+              const selectedAttr = selectedIds.includes(item._id) ? 'selected' : '';
+              return `<option value="${item._id}" ${selectedAttr}>${item.name}</option>`;
+            }).join('');
+
+            const html = `
+              <div class="mb-3" id="applicable_field_${type}">
+                <label>${type.charAt(0).toUpperCase() + type.slice(1)} List</label>
+                <select name="applicable_ids[${type}][]" multiple class="form-control select2">
+                  ${optionsHtml}
+                </select>
+              </div>`;
+
+            $('#applicableDynamicFields').append(html);
+
+            $('#applicable_field_' + type).find('select').select2({
+              width: '100%',
+              dropdownParent: $('#applicableDynamicFields')
+            });
+          }
+        }
+      });
+    }
+
+    // Initial form setup
+    toggleApplicableToFields();
+
+    if (isEdit && applyScope === 'specific') {
+      $('#apply_specific').prop('checked', true);
+      $('#applicable_to_wrapper').show();
+      $('#applicable_to').val(applicableTo).trigger('change');
+
+      // Load each section with pre-filled IDs
+      applicableTo.forEach(type => {
+        fetchAndRenderApplicableBlock(type, prefilledData[type] || []);
+      });
+    }
+
+    // Change handler for radio buttons
+    $('input[name="apply_scope"]').on('change', function () {
+      toggleApplicableToFields();
+    });
+
+    // Change handler for multi-select
+    $('#applicable_to').on('change', function () {
+      const selectedTypes = $(this).val() || [];
+
+      const removedTypes = previousSelectedTypes.filter(type => !selectedTypes.includes(type));
+      const addedTypes = selectedTypes.filter(type => !previousSelectedTypes.includes(type));
+
+      // Remove blocks for removed types
+      removedTypes.forEach(type => {
+        $('#applicable_field_' + type).remove();
+      });
+
+      // Add new blocks
+      addedTypes.forEach(type => {
+        fetchAndRenderApplicableBlock(type, prefilledData[type] || []);
+      });
+
+      previousSelectedTypes = [...selectedTypes]; // Update tracker
+    });
+  });
+</script>
+
+
+

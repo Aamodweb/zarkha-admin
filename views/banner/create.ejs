@@ -1,0 +1,123 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (banner) { %>
+             <span>Edit Banner</span>
+        <% } else { %>
+             <span>Create Banner</span>
+        <% } %>
+      <a href="/banner" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/banner/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (banner) { %>
+            <input type="hidden" name="id" value="<%= banner.id %>">
+            <% } %>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="name" class="form-label">Title <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="title" name="title" value="<%= banner && banner.title ? banner.title : '' %>"  placeholder="Enter Banner Title" data-required="Title">
+          </div>
+          <div class="col-md-6">
+            <label for="name" class="form-label">Sub Title <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="subtitle" name="subtitle" value="<%= banner && banner.subtitle ? banner.subtitle : '' %>"  placeholder="Enter Banner Sub Title" data-required="Sub Title">
+          </div>
+
+          <div class="col-md-6">
+            <label for="image" class="form-label">Image <span class="mandatory">*</span></label>
+            <input type="file" class="form-control" id="image" name="image"<% if (!banner) { %> data-required="Image"  <% }%>>
+
+            <% if (banner && banner.image) { %>
+              <img src="<%= BASE_URL%>/uploads/banner/<%= banner.image %>" alt="Banner Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+            <% }%>
+          </div>
+          <div class="col-md-6">
+            <label for="Link" class="form-label">Link <span class="mandatory">*</span></label>
+            <input type="text" class="form-control" id="link" name="link" value="<%= banner && banner.link ? banner.link : '' %>"  placeholder="Enter Banner Link" data-required="Link">
+          </div>
+          
+          <div class="col-md-6">
+            <label for="Link" class="form-label">Postion <span class="mandatory">*</span></label>
+             <select name="position" id="position" class="form-control" data-required="Postion">
+                  <option value="">Select Postion</option>
+                  <option value="homepage" <% if (banner && banner.position === 'homepage') { %> selected <% } %>>Homepage</option>
+                  <option value="category" <% if (banner && banner.position === 'category') { %> selected <% } %>>Category</option>
+                  <option value="product" <% if (banner && banner.position === 'product') { %> selected <% } %>>Product</option>
+                  <option value="custom" <% if (banner && banner.position === 'custom') { %> selected <% } %>>Custom</option>
+             </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="Sort Order" class="form-label">Sort Order <span class="mandatory">*</span></label>
+            <input type="number" class="form-control" id="sort_order" name="sort_order" value="<%= banner && banner.sort_order ? banner.sort_order : '' %>"  placeholder="Enter Sort Order" data-required="Sort Order">
+          </div>
+
+           <div class="col-md-6">
+              <label for="status" class="form-label">Status <span class="mandatory">*</span></label>
+              <select class="form-select" id="status" name="status" data-required="Status">
+                  <option value="">Select status</option>
+                  <option value="active" <% if (banner && banner.status === 'active') { %> selected <% } %>>Active</option>
+                  <option value="inactive" <% if (banner && banner.status === 'inactive') { %> selected <% } %>>Inactive</option>
+              </select>
+           </div>
+            <div class="col-md-12">
+              <label for="hash_tags" class="form-label">Hashtags (Optional)</label>
+              <select name="hash_tags[]" id="hash_tags" class="form-control select2" multiple>
+                <% hashtag.forEach((tag) => { %>
+                  <option value="<%= tag.id %>" 
+                    <% if (banner && Array.isArray(banner.hash_tags) && banner.hash_tags.includes(tag.id)) { %> selected <% } %>>
+                    #<%= tag.name %>
+                  </option>
+                <% }) %>
+              </select>
+              <small>Select one or more hashtags for better searchability.</small>
+            </div>
+        </div>
+        <h5>SEO Information</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <label>Meta Title</label>
+            <input type="text" name="seo[meta_title]" class="form-control" value="<%= banner && banner.seo.meta_title ? banner.seo.meta_title : '' %>">
+          </div>
+          <div class="col-md-6">
+            <label>Meta Description</label>
+            <textarea name="seo[meta_description]" class="form-control"><%= banner?.seo?.meta_description || '' %></textarea>
+          </div>
+          <div class="col-md-6">
+            <label>Meta Keywords</label>
+            <input type="text" name="seo[meta_keywords]" class="form-control" value="<%= banner && banner.seo.meta_keywords ? banner.seo.meta_keywords : '' %>">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label>Canonical URL</label>
+            <input type="text" name="seo[canonical_url]" class="form-control" value="<%= banner && banner.seo.canonical_url ? banner.seo.canonical_url : '' %>">
+          </div>
+        </div>
+
+        <div class="text-end">
+             <% if (banner) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Banner</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Banner</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<%- include('../layout/footer') %>
+<script>
+  $(document).ready(function() {
+    $('#hash_tags').select2({
+      placeholder: "Select hashtags",
+      tags: true,
+      tokenSeparators: [',']
+    });
+  });
+</script>

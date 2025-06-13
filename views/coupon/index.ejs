@@ -1,0 +1,89 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Coupon List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search Coupon..."
+              aria-label="Search Coupon"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/coupon/create" class="btn btn-add btn-primary">+ Add New Coupon</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Code</th>
+                <th>Discount Type</th>
+                <th>Discount Value</th>
+                <th>Max Discount Amt. (for % type)</th>
+                <th>Min Cart Value</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (coupons && coupons.length > 0) { %>
+                <% coupons.forEach((coupon, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= coupon.code ? coupon.code : '' %></td>
+                    <td><%= coupon.discount_type %></td>
+                    <td><%= coupon.discount_value %></td>
+                    <td><%= coupon.max_discount_amount %></td>
+                    <td>₹ <%= coupon.min_cart_value %></td>
+                    <td><%= formatDate(coupon.start_date) %></td>
+                    <td><%= formatDate(coupon.end_date) %></td>
+                    <td>
+                       <% if (coupon.status === 'active') { %>
+                         <span class="status active"><%= coupon.status %></span>
+                        <% } else { %>
+                         <span class="status inactive"><%= coupon.status %></span> 
+                        <% } %>
+                    </td>
+                    <td>
+                        <a href="<%= BASE_URL %>/coupon/view/<%= coupon.id %>" class="action-btn edit" title="Edit"><i class="fas fa-eye"></i></a>
+                        <a href="<%= BASE_URL %>/coupon/edit/<%= coupon.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/coupon/delete/<%= coupon.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="10">No data found</td></tr>
+                <% } %>
+                 <% function formatDate(dateString) { const date=new Date(dateString); const options={
+                          year: 'numeric' , month: 'short' , day: 'numeric' , hour: 'numeric' , minute: 'numeric' ,
+                          hour12: true }; return new Intl.DateTimeFormat('en-US', options).format(date); } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

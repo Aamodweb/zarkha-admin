@@ -1,0 +1,93 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Banner List</h2>
+
+        <div class="header-controls">
+          <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search Banner..."
+              aria-label="Search Banner"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+           <div>
+             <a href="/banner/create" class="btn btn-add btn-primary">+ Add New Banner</a>
+           </div>
+        </div>
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Subtitle</th>
+                <th>Image</th>
+                <th>Link</th>
+                <th>Position</th>
+                <th>Sort Order</th>
+                <th>Hashtag</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (banners && banners.length > 0) { %>
+                <% banners.forEach((banner, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= banner.title ? banner.title : '' %></td>
+                    <td><%= banner.subtitle %></td>
+                    <td><img src="<%= BASE_URL%>/uploads/banner/<%= banner.image %>" alt="" width="50px"></td>
+                    <td><%= banner.link %></td>
+                    <td><%= banner.position %></td>
+                    <td><%= banner.sort_order %></td>
+                    <td>
+                      <% if (banner.hash_tags && banner.hash_tags.length) { %>
+                        <% banner.hash_tags.forEach(tag => { %>
+                          <span class="badge bg-secondary">#<%= tag.name %></span>
+                        <% }) %>
+                      <% } else { %>
+                        N/A
+                      <% } %>
+                    </td>
+                    <td>
+                       <% if (banner.status === 'active') { %>
+                         <span class="status active"><%= banner.status %></span>
+                        <% } else { %>
+                         <span class="status inactive"><%= banner.status %></span> 
+                        <% } %>
+                    </td>
+                    <td>
+                        <a href="<%= BASE_URL %>/banner/edit/<%= banner.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/banner/delete/<%= banner.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="10">No data found</td></tr>
+                <% } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

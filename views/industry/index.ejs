@@ -25,6 +25,13 @@
            <div>
              <a href="/industry/create" class="btn btn-add btn-primary">+ Add New Industry</a>
            </div>
+           <div>
+             <!-- Trigger button -->
+              <a href="javascript:void(0);" class="btn btn-add btn-secondary" data-bs-toggle="modal" data-bs-target="#industryBulkModal">
+                Bulk Import/Export
+              </a>
+
+           </div>
         </div>
       </div>
 
@@ -79,6 +86,49 @@
 
     </div>
 
+  </div>
+</div>
+<!-- Bulk Import/Export Modal -->
+<div class="modal fade" id="industryBulkModal" tabindex="-1" aria-labelledby="industryBulkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="industryBulkModalLabel">Bulk Import/Export - Industry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+
+        <!-- Download Sample -->
+        <div class="mb-3">
+          <a href="<%= BASE_URL %>/uploads/industry-sample.xlsx" class="btn btn-outline-primary w-100">
+            📥 Download Sample Excel
+          </a>
+        </div>
+
+        <!-- Download Existing -->
+        <div class="mb-3">
+          <a href="/industry/export" class="btn btn-outline-success w-100">
+            📤 Export Existing Data
+          </a>
+        </div>
+
+        <!-- Import Form -->
+        <form action="/industry/import" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+             <span class="mandatory">Note: First, download the sample file and upload data in the same format.</span><br>
+            <label class="form-label">Import Industry Excel <span class="mandatory"></span></label>
+            <input type="file" name="csv_file" accept=".xlsx" class="form-control" required>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">📊 Import</button>
+          </div>
+        </form>
+
+      </div>
+      
+    </div>
   </div>
 </div>
 
