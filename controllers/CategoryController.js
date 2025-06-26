@@ -2,6 +2,12 @@ const bcrypt = require('bcrypt');
 const Industry = require('../models/Industry');
 const Category = require('../models/Category');
 const Hashtag = require('../models/Hashtag');
+const XLSX = require('xlsx');
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+const mime = require('mime-types'); // Add at top of file
+const { v4: uuidv4 } = require('uuid');
 
 const List = async(req,res)=>{
     try{
@@ -44,6 +50,29 @@ const slugify = (text) => {
     .replace(/\-\-+/g, '-')     // Replace multiple - with single -
     .replace(/^-+|-+$/g, '');   // Trim - from start and end
 };
+
+// const downloadImageFromUrl = async (url, folderPath) => {
+//   const response = await axios({
+//     url,
+//     method: 'GET',
+//     responseType: 'stream'
+//   });
+
+//   // Get correct extension from Content-Type
+//   const contentType = response.headers['content-type'];
+//   const ext = mime.extension(contentType) || 'jpg'; // fallback to jpg
+
+//   const fileName = `${uuidv4()}.${ext}`;
+//   const filePath = path.join(folderPath, fileName);
+
+//   const writer = fs.createWriteStream(filePath);
+//   response.data.pipe(writer);
+
+//   return new Promise((resolve, reject) => {
+//     writer.on('finish', () => resolve(fileName));
+//     writer.on('error', reject);
+//   });
+// };
 
 
 const Store = async (req, res) => {
@@ -222,4 +251,156 @@ const FilterCategoryGet = async (req, res) => {
   }
 };
 
-module.exports = {List,Create,Store,Edit,Delete,FilterCategoryGet};
+const CategoryExport = async (req, res) => {
+  try {
+    const categorys = await Category.find()
+      .populate('industry_id')
+      .lean();
+
+    if (!categorys || categorys.length === 0) {
+      return res.status(404).send('No Category found to export.');
+    }
+
+    // Prepare export data
+      const exportData = categorys.map((category, index) => ({
+      SNo: index + 1,
+      Industry: category.industry_id.name || '',
+      Name: category.name || '',
+      Slug: category.slug || '',
+      Description: category.description || '',
+      Status: category.status || 'inactive',
+      Hashtags: (category.hash_tags || []).map(ht => ht.name).join(', '),
+      meta_title: category.seo?.meta_title || '',
+      meta_description: category.seo?.meta_description || '',
+      meta_keyword: category.seo?.meta_keyword || '',
+      Status: category.status || 'inactive',
+      CreatedAt: category.created_at ? new Date(category.created_at).toLocaleString() : '',
+    }));
+
+
+    // Convert to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Industries');
+
+    // Write to buffer
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Send response
+    res.setHeader('Content-Disposition', 'attachment; filename="category_export.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    return res.send(buffer);
+
+  } catch (error) {
+    console.error('Category export error:', error);
+    return res.status(500).send('Failed to export Category.');
+  }
+};
+
+const CategoryImport = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const filePath = req.file.path;
+
+    // Read Excel/CSV file
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    console.log('File uploaded:', filePath);
+    
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    const inserted = [];
+    const skipped = [];
+
+    for (const row of rows) {
+       console.log("row",row);
+      const { industry_id,name,description,status,image,meta_title,meta_description,meta_keyword,hashtags } = row;
+
+      if (!name || !status || !industry_id) {
+        skipped.push({ name, reason: 'Missing name or status or industry id' });
+        continue;
+      }
+
+      const slug = name.trim().toLowerCase().replace(/\s+/g, '-');
+
+      // Check for duplicates
+      const existingCategory = await Category.findOne({ name: name.trim() });
+      if (existingCategory) {
+        skipped.push({ name, reason: 'Already exists' });
+        continue;
+      }
+
+      // Parse comma-separated hashtag IDs and fetch active ones
+      let hashTagIds = [];
+
+      if (hashtags && String(hashtags).trim() !== '') {
+            const ids = String(hashtags)
+              .split(',')
+              .map(id => id.trim())
+              .filter(id => id);
+
+                console.log("after filter hashids",ids);
+
+            // Fetch only active hashtags
+            const validHashtags = await Hashtag.find({
+              _id: { $in: ids },
+              status: 'active' // or true if your schema uses boolean
+            }).select('_id');
+
+            console.log("valid hashtag ids",validHashtags);
+
+            hashTagIds = validHashtags.map(tag => tag._id);
+          }
+
+
+          // Download image from URL
+          let savedImage = '';
+          // let categoryUploadPath = path.join(__dirname, '../uploads/category');
+          // console.log("category upload path",categoryUploadPath);
+          // if (image && image.startsWith('http')) {
+          //   try {
+          //     savedImage = await downloadImageFromUrl(image, categoryUploadPath);
+          //   } catch (err) {
+          //     console.warn(`Image download failed for ${name}: ${err.message}`);
+          //     skipped.push({ name, reason: 'Image download failed' });
+          //     continue;
+          //   }
+          // }
+
+
+      // Insert new Industry
+      await Category.create({
+         industry_id,
+          name,
+          slug,
+          image: savedImage, // Use the new image path
+          description,
+          status: status,
+          seo: {
+                  meta_title: meta_title || '',
+                  meta_description: meta_description || '',
+                  meta_keywords: meta_keyword || ''
+                },
+        hash_tags: hashTagIds
+      });
+
+      inserted.push(name.trim());
+    }
+
+    return res.json({
+      message: `Import completed: ${inserted.length} inserted, ${skipped.length} skipped`,
+      inserted,
+      skipped
+    });
+
+  } catch (err) {
+    console.error('Import error:', err);
+    return res.status(500).json({ error: 'Import failed', details: err.message });
+  }
+};
+
+module.exports = {List,Create,Store,Edit,Delete,FilterCategoryGet,CategoryExport,CategoryImport};

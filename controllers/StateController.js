@@ -209,5 +209,19 @@ const Delete = async (req, res) => {
     }
 }
 
+const GetState = async (req,res) => {
+   try {
+        let countryId = req.query.country_id;
+        if (!countryId) return res.status(400).json({ error: "Country ID is required" });
 
-module.exports = {List,Create,Store,Edit,Delete,ImportXLSX};
+        let states = await State.find({ country_id: countryId }); // Fetch cities based on state
+        res.json(states);
+    } catch (error) {
+        console.error("Error fetching cities:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+
+}
+
+
+module.exports = {List,Create,Store,Edit,Delete,ImportXLSX,GetState};

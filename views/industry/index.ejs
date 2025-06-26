@@ -115,12 +115,14 @@
         </div>
 
         <!-- Import Form -->
-        <form action="/industry/import" method="POST" enctype="multipart/form-data">
+        <form action="/industry/import" id="importCSVForm" method="POST" enctype="multipart/form-data">
           <div class="mb-3">
              <span class="mandatory">Note: First, download the sample file and upload data in the same format.</span><br>
             <label class="form-label">Import Industry Excel <span class="mandatory"></span></label>
-            <input type="file" name="csv_file" accept=".xlsx" class="form-control" required>
+            <input class="form-control" type="file" id="csvFile" name="csvFile" accept=".xlsx" required />
+
           </div>
+           <div id="importResult" class="text-success small mt-2"></div>
           <div class="d-grid">
             <button type="submit" class="btn btn-primary">📊 Import</button>
           </div>
@@ -133,3 +135,41 @@
 </div>
 
 <%- include('../layout/footer') %>
+<script>
+  $('#importCSVForm').on('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: '/industry/import',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      beforeSend: () => {
+        $('#importResult').removeClass('text-danger').text('Uploading...');
+      },
+      success: function (res) {
+         let resultHtml = `<div class="fw-bold text-success">${res.message}</div>`;
+
+        if (res.skipped && res.skipped.length > 0) {
+          resultHtml += `<div class="mt-2 text-warning"><strong>Skipped:</strong><ul>`;
+          res.skipped.forEach(item => {
+            resultHtml += `<li><b>${item.name || '[Unnamed]'}</b>: ${item.reason}</li>`;
+          });
+          resultHtml += `</ul></div>`;
+        }
+
+        $('#importResult').html(resultHtml);
+
+        setTimeout(() => {
+          $('#importCSVModal').modal('hide');
+          location.reload();
+        }, 1000);
+      },
+      error: function (err) {
+        $('#importResult').addClass('text-danger').text('Failed to import CSV.');
+      }
+    });
+  });
+</script>

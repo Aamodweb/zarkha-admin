@@ -3,6 +3,8 @@ const Industry = require('../models/Industry');
 const Category = require('../models/Category');
 const Subcategory = require('../models/Subcategory');
 const Hashtag = require('../models/Hashtag');
+const XLSX = require('xlsx');
+const fs = require('fs');
 
 const List = async(req,res)=>{
     try{
@@ -221,4 +223,157 @@ const FilterSubcategoryGet = async (req, res) => {
   }
 };
 
-module.exports = {List,Create,Store,Edit,Delete,FilterSubcategoryGet};
+const SubcategoryExport = async (req, res) => {
+  try {
+    const subcategorys = await Subcategory.find()
+      .populate('category_id')
+      .populate('hash_tags')
+      .lean();
+
+    if (!subcategorys || subcategorys.length === 0) {
+      return res.status(404).send('No Subcategory found to export.');
+    }
+
+    // Prepare export data
+      const exportData = subcategorys.map((subcategory, index) => ({
+      SNo: index + 1,
+      Category: subcategory.category_id.name || '',
+      Name: subcategory.name || '',
+      Slug: subcategory.slug || '',
+      Description: subcategory.description || '',
+      Status: subcategory.status || 'inactive',
+      Hashtags: (subcategory.hash_tags || []).map(ht => ht.name).join(', '),
+      meta_title: subcategory.seo?.meta_title || '',
+      meta_description: subcategory.seo?.meta_description || '',
+      meta_keyword: subcategory.seo?.meta_keyword || '',
+      Status: subcategory.status || 'inactive',
+      CreatedAt: subcategory.created_at ? new Date(category.created_at).toLocaleString() : '',
+    }));
+
+
+    // Convert to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'SubCategory');
+
+    // Write to buffer
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Send response
+    res.setHeader('Content-Disposition', 'attachment; filename="subcategory.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    return res.send(buffer);
+
+  } catch (error) {
+    console.error('Subcategory export error:', error);
+    return res.status(500).send('Failed to export Subcategory.');
+  }
+};
+
+const SubcategoryImport = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const filePath = req.file.path;
+
+    // Read Excel/CSV file
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    console.log('File uploaded:', filePath);
+    
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    const inserted = [];
+    const skipped = [];
+
+    for (const row of rows) {
+       console.log("row",row);
+      const { category_id,name,description,status,image,meta_title,meta_description,meta_keyword,hashtags } = row;
+
+      if (!name || !status || !category_id) {
+        skipped.push({ name, reason: 'Missing name or status or category id' });
+        continue;
+      }
+
+      const slug = name.trim().toLowerCase().replace(/\s+/g, '-');
+
+      // Check for duplicates
+      const existingCategory = await Subcategory.findOne({ name: name.trim() });
+      if (existingCategory) {
+        skipped.push({ name, reason: 'Already exists' });
+        continue;
+      }
+
+      // Parse comma-separated hashtag IDs and fetch active ones
+      let hashTagIds = [];
+
+      if (hashtags && String(hashtags).trim() !== '') {
+            const ids = String(hashtags)
+              .split(',')
+              .map(id => id.trim())
+              .filter(id => id);
+
+                console.log("after filter hashids",ids);
+
+            // Fetch only active hashtags
+            const validHashtags = await Hashtag.find({
+              _id: { $in: ids },
+              status: 'active' // or true if your schema uses boolean
+            }).select('_id');
+
+            console.log("valid hashtag ids",validHashtags);
+
+            hashTagIds = validHashtags.map(tag => tag._id);
+          }
+
+
+          // Download image from URL
+          let savedImage = '';
+          // let categoryUploadPath = path.join(__dirname, '../uploads/category');
+          // console.log("category upload path",categoryUploadPath);
+          // if (image && image.startsWith('http')) {
+          //   try {
+          //     savedImage = await downloadImageFromUrl(image, categoryUploadPath);
+          //   } catch (err) {
+          //     console.warn(`Image download failed for ${name}: ${err.message}`);
+          //     skipped.push({ name, reason: 'Image download failed' });
+          //     continue;
+          //   }
+          // }
+
+
+      // Insert new Industry
+      await Subcategory.create({
+          category_id,
+          name,
+          slug,
+          image: savedImage, // Use the new image path
+          description,
+          status: status,
+          seo: {
+                  meta_title: meta_title || '',
+                  meta_description: meta_description || '',
+                  meta_keywords: meta_keyword || ''
+                },
+        hash_tags: hashTagIds
+      });
+
+      inserted.push(name.trim());
+    }
+
+    return res.json({
+      message: `Import completed: ${inserted.length} inserted, ${skipped.length} skipped`,
+      inserted,
+      skipped
+    });
+
+  } catch (err) {
+    console.error('Import error:', err);
+    return res.status(500).json({ error: 'Import failed', details: err.message });
+  }
+};
+
+module.exports = {List,Create,Store,Edit,Delete,FilterSubcategoryGet,SubcategoryImport,SubcategoryExport};

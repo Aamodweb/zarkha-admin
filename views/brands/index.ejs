@@ -25,6 +25,12 @@
            <div>
              <a href="/brands/create" class="btn btn-add btn-primary">+ Add New Brands</a>
            </div>
+           <div>
+             <!-- Trigger button -->
+              <a href="javascript:void(0);" class="btn btn-add btn-secondary" data-bs-toggle="modal" data-bs-target="#brandBulkModal">
+                Bulk Import/Export
+              </a>
+            </div>
         </div>
       </div>
 
@@ -88,4 +94,85 @@
   </div>
 </div>
 
+<div class="modal fade" id="brandBulkModal" tabindex="-1" aria-labelledby="brandBulkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="brandBulkModalLabel">Bulk Import/Export - Brands</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+
+        <!-- Download Sample -->
+        <div class="mb-3">
+          <a href="<%= BASE_URL %>/uploads/brand-sample.xlsx" class="btn btn-outline-primary w-100">
+            📥 Download Sample Excel
+          </a>
+        </div>
+        <!-- Download Existing -->
+        <div class="mb-3">
+          <a href="/brands/export" class="btn btn-outline-success w-100">
+            📤 Export Existing Data
+          </a>
+        </div>
+        <!-- Import Form -->
+        <form action="/brands/import" id="importCSVForm" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+             <span class="mandatory">Note: First, download the sample file and upload data in the same format.</span><br>
+            <label class="form-label">Import Brand Excel <span class="mandatory"></span></label>
+            <input class="form-control" type="file" id="csvFile" name="csvFile" accept=".xlsx" required />
+
+          </div>
+           <div id="importResult" class="text-success small mt-2"></div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">📊 Import</button>
+          </div>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
 <%- include('../layout/footer') %>
+<script>
+  $('#importCSVForm').on('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: '/subcategory/import',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      beforeSend: () => {
+        $('#importResult').removeClass('text-danger').text('Uploading...');
+      },
+      success: function (res) {
+         let resultHtml = `<div class="fw-bold text-success">${res.message}</div>`;
+
+        if (res.skipped && res.skipped.length > 0) {
+          resultHtml += `<div class="mt-2 text-warning"><strong>Skipped:</strong><ul>`;
+          res.skipped.forEach(item => {
+            resultHtml += `<li><b>${item.name || '[Unnamed]'}</b>: ${item.reason}</li>`;
+          });
+          resultHtml += `</ul></div>`;
+        }
+
+        $('#importResult').html(resultHtml);
+
+        setTimeout(() => {
+          $('#subcategoryBulkModal').modal('hide');
+          location.reload();
+        }, 1000);
+      },
+      error: function (err) {
+        $('#importResult').addClass('text-danger').text('Failed to import CSV.');
+      }
+    });
+  });
+</script>

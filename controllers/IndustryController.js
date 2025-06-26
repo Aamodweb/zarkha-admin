@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const Industry = require('../models/Industry');
 const jwt = require('jsonwebtoken');
 const XLSX = require('xlsx');
+const fs = require('fs');
 const Hashtag = require('../models/Hashtag');
 
 const List = async(req,res)=>{
@@ -170,6 +171,7 @@ const IndustryExport = async (req, res) => {
       const exportData = industries.map((industry, index) => ({
       SNo: index + 1,
       Name: industry.name || '',
+      Description: industry.description || '',
       Slug: industry.slug || '',
       Status: industry.status || 'inactive',
       Hashtags: (industry.hash_tags || []).map(ht => ht.name).join(', '),
@@ -200,5 +202,93 @@ const IndustryExport = async (req, res) => {
   }
 };
 
-module.exports = {List,Create,Store,Edit,Delete,IndustryExport};
+const IndustryImport = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const filePath = req.file.path;
+
+    // Read Excel/CSV file
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    console.log('File uploaded:', filePath);
+    
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    const inserted = [];
+    const skipped = [];
+
+    for (const row of rows) {
+       console.log("row",row);
+      const { name, status, hashtags,description, meta_title, meta_description, meta_keyword } = row;
+
+      if (!name || !status) {
+        skipped.push({ name, reason: 'Missing name or status' });
+        continue;
+      }
+
+      const slug = name.trim().toLowerCase().replace(/\s+/g, '-');
+
+      // Check for duplicates
+      const existingIndustry = await Industry.findOne({ name: name.trim() });
+      if (existingIndustry) {
+        skipped.push({ name, reason: 'Already exists' });
+        continue;
+      }
+
+      // Parse comma-separated hashtag IDs and fetch active ones
+      let hashTagIds = [];
+
+      if (hashtags && String(hashtags).trim() !== '') {
+            const ids = String(hashtags)
+              .split(',')
+              .map(id => id.trim())
+              .filter(id => id);
+
+               console.log("after filter hashids",ids);
+
+            // Fetch only active hashtags
+            const validHashtags = await Hashtag.find({
+              _id: { $in: ids },
+              status: 'active' // or true if your schema uses boolean
+            }).select('_id');
+
+            console.log("valid hashtag ids",validHashtags);
+
+            hashTagIds = validHashtags.map(tag => tag._id);
+         }
+
+      // Insert new Industry
+      await Industry.create({
+        name: name.trim(),
+        description: description,
+        slug,
+        status,
+        seo: {
+          meta_title: meta_title || '',
+          meta_description: meta_description || '',
+          meta_keywords: meta_keyword || ''
+        },
+        hash_tags: hashTagIds
+      });
+
+      inserted.push(name.trim());
+    }
+
+    return res.json({
+      message: `Import completed: ${inserted.length} inserted, ${skipped.length} skipped`,
+      inserted,
+      skipped
+    });
+
+  } catch (err) {
+    console.error('Import error:', err);
+    return res.status(500).json({ error: 'Import failed', details: err.message });
+  }
+};
+
+module.exports = {List,Create,Store,Edit,Delete,IndustryExport,IndustryImport};
 

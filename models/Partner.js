@@ -20,6 +20,11 @@ const PartnerSchema = new mongoose.Schema({
   pickup_address_1: String,
   pickup_address_2: String,
   pincode: String,
+  country_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Country',
+    required: true
+  },
   state_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'State',
@@ -30,6 +35,7 @@ const PartnerSchema = new mongoose.Schema({
     ref: 'City',
     required: true
   },
+  pickup_contact_type: String,
   pickup_contact_person: String,
   pickup_phone: String,
 
@@ -56,6 +62,7 @@ const PartnerSchema = new mongoose.Schema({
     source_from_zarkha: Boolean,
     margin_percent: Number,
     self_pricing_enabled: Boolean,
+    has_branches: Boolean,
     return_policy: String,
     delivery_partner_preference: String,
     operating_days: [String],

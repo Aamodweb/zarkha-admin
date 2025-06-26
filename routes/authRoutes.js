@@ -28,6 +28,14 @@ const HashtagController = require('../controllers/HashtagController');
 const BannerController = require('../controllers/BannerController');
 const CouponController = require('../controllers/CouponController');
 
+
+//for csv import
+const csvUploadPath = 'uploads/';
+const  csvStorage = setupStorage(csvUploadPath);
+const csvUpload = multer({ storage: csvStorage });
+
+
+
 // Routes
 router.get('/',redirectIfAuthenticated, authController.login);
 router.post('/login', authController.LoginCheck);
@@ -52,6 +60,7 @@ router.post('/industry/store',authMiddleware,upload.none(), industryController.S
 router.get('/industry/edit/:id',authMiddleware, industryController.Edit);
 router.get('/industry/delete/:id',authMiddleware, industryController.Delete);
 router.get('/industry/export',authMiddleware, industryController.IndustryExport);
+router.post('/industry/import',authMiddleware,csvUpload.single('csvFile'),industryController.IndustryImport);
 
 
 const categoryUploadPath = 'uploads/category/';
@@ -65,6 +74,8 @@ router.post('/category/store',authMiddleware, categoryUpload.array('image'),cate
 router.get('/category/edit/:id',authMiddleware, categoryController.Edit);
 router.get('/category/delete/:id',authMiddleware, categoryController.Delete);
 router.get('/filter-category-get',authMiddleware, categoryController.FilterCategoryGet);
+router.get('/category/export',authMiddleware, categoryController.CategoryExport);
+router.post('/category/import',authMiddleware,csvUpload.single('csvFile'), categoryController.CategoryImport);
 
 
 
@@ -80,6 +91,8 @@ router.post('/subcategory/store',authMiddleware, subcategoryUpload.array('image'
 router.get('/subcategory/edit/:id',authMiddleware, subcategoryController.Edit);
 router.get('/subcategory/delete/:id',authMiddleware, subcategoryController.Delete);
 router.get('/filter-subcategory-get',authMiddleware, subcategoryController.FilterSubcategoryGet);
+router.get('/subcategory/export',authMiddleware, subcategoryController.SubcategoryExport);
+router.post('/subcategory/import',authMiddleware,csvUpload.single('csvFile'), subcategoryController.SubcategoryImport);
 
 
 
@@ -95,6 +108,8 @@ router.post('/brands/store',authMiddleware, brandsUpload.array('image'),brandsCo
 router.get('/brands/edit/:id',authMiddleware, brandsController.Edit);
 router.get('/brands/delete/:id',authMiddleware, brandsController.Delete);
 router.get('/filter-brand-get',authMiddleware, brandsController.FilterBrandGet);
+router.get('/brands/export',authMiddleware, brandsController.BrandsExport);
+router.post('/brands/import',authMiddleware,csvUpload.single('csvFile'), brandsController.BrandsImport);
 
 
 
@@ -169,11 +184,6 @@ router.get('/country/edit/:id',authMiddleware, countryController.Edit);
 router.get('/country/delete/:id',authMiddleware, countryController.Delete);
 
 
-// brands module
-const csvUploadPath = 'uploads/';
-const  csvStorage = setupStorage(csvUploadPath);
-const csvUpload = multer({ storage: csvStorage });
-
 
 // state  module 
 router.get('/state',authMiddleware, stateController.List);
@@ -181,6 +191,7 @@ router.get('/state/create',authMiddleware, stateController.Create);
 router.post('/state/store',authMiddleware, upload.none(),stateController.Store);
 router.get('/state/edit/:id',authMiddleware, stateController.Edit);
 router.get('/state/delete/:id',authMiddleware, stateController.Delete);
+router.get('/get-states',authMiddleware, stateController.GetState);
 router.post('/state/import-xlsx',authMiddleware,csvUpload.single('csvFile'), stateController.ImportXLSX);
 
 // city Module create
@@ -199,6 +210,8 @@ router.get('/hashtag/create',authMiddleware, HashtagController.Create);
 router.post('/hashtag/store',authMiddleware,upload.none(),HashtagController.Store);
 router.get('/hashtag/edit/:id',authMiddleware, HashtagController.Edit);
 router.get('/hashtag/delete/:id',authMiddleware, HashtagController.Delete);
+router.get('/hashtag/export',authMiddleware, HashtagController.HashtagExport);
+router.post('/hashtag/import',authMiddleware,csvUpload.single('csvFile'), HashtagController.HashTagImport);
 
 const bannerUploadPath = 'uploads/banner/';
 const  bannerStorage = setupStorage(bannerUploadPath);

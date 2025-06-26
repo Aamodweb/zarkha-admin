@@ -36,6 +36,13 @@ const CategorySchema = new mongoose.Schema({
   canonical_url: String,
 },
 hash_tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Hashtag' }],
+created_at: {
+  type: Date,
+  default: Date.now
+},
+updated_at: {
+  type: Date
+},
 }, { timestamps: true });
 
 module.exports = mongoose.model('Category', CategorySchema);

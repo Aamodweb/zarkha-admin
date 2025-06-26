@@ -13,6 +13,7 @@
    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
    <style>
     .mandatory{
       color:red;
@@ -65,7 +66,7 @@
 
   <!-- Common Setting Dropdown -->
   <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') || currentRoute.startsWith('/hashtag') || currentRoute.startsWith('/banner') ? 'active' : '' || currentRoute.startsWith('/coupon') ? 'active' : '' %>">
-    <a href="javascript:void(0)"><span> <i class="fas fa-cogs"></i>  Common Setting</span>  <i class="fas fa-chevron-down submenu-toggle-icon"></i></a>
+    <a href="javascript:void(0)"><span> <i class="fas fa-cogs"></i>&nbsp;Global Setting</span>  <i class="fas fa-chevron-down submenu-toggle-icon"></i></a>
     <ul class="submenu">
       <li class="<%= currentRoute.startsWith('/banner') ? 'active' : '' %>">
         <a href="/banner"><i class="fa-solid fa-image"></i> Banners </a>

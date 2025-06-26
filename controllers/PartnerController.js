@@ -6,6 +6,7 @@ const Industry = require('../models/Industry');
 const Partner = require('../models/Partner');
 const Country = require('../models/Country');
 const State = require('../models/State');
+const { logAudit } = require('../utils/helpers');
 
 const List = async(req,res)=>{
     try{
@@ -34,11 +35,9 @@ const Create = async(req,res)=>{
         // Render the create page with the industries
 
           // Fetch only India from countries collection
-        const country = await Country.findOne({ name: "India" });
-        // Fetch only states belonging to India
-        const states = await State.find({ country_id: country._id });
+        const country = await Country.find();
 
-        res.render('partner/create', { partner,industries,states, message: "" });
+        res.render('partner/create', { partner,country,industries, message: "" });
     }
     catch(error){
         console.log(error.message);
@@ -82,6 +81,25 @@ const Store = async (req, res) => {
 };
 
 
+const generateUniqueLoginEmail = async (name) => {
+   const cleanName = name?.toLowerCase().replace(/\s+/g, '');
+    let dashboard_email;
+    let isUnique = false;
+
+    // Loop until a unique dashboard_email is generated
+    while (!isUnique) {
+      const randomNumber = Math.floor(1000 + Math.random() * 9000);
+      const generatedEmail = `${cleanName}${randomNumber}@zarkha.com`;
+      const existingEmail = await Partner.findOne({ dashboard_email: generatedEmail });
+      
+      if (!existingEmail) {
+        dashboard_email = generatedEmail;
+        isUnique = true;
+      }
+    }
+
+    return dashboard_email;
+};
 
 const storeBoutique = async (req, res) => {
    console.log("Request cookies",req.cookies.access_token);
@@ -94,7 +112,7 @@ const storeBoutique = async (req, res) => {
    
      // Build query only for boutique type
       let query = {
-        dashboard_email: req.body.dashboard_email
+        mobile: req.body.mobile
       };
 
       // If this is an update, exclude current ID
@@ -119,7 +137,7 @@ const storeBoutique = async (req, res) => {
 
         return res.status(200).json({
           status: false,
-          errors: { dashboard_email: 'Partner with this dashboard email already exists' },
+          errors: { mobile: 'Partner with this mobile already exists' },
         });
       }
 
@@ -131,6 +149,10 @@ const storeBoutique = async (req, res) => {
     const digital_signature = req.files?.digital_signature?.[0]?.filename || '';
     const store_logo = req.files?.store_logo?.[0]?.filename || '';
 
+
+    const dashboard_email = await generateUniqueLoginEmail(req.body.name);
+    const rawPassword = Math.random().toString(36).slice(-8); // e.g., abx74xkz
+     const hashedPassword = await bcrypt.hash(rawPassword, 10);
     
     const partnerData = {
       role: 'boutique',
@@ -138,8 +160,8 @@ const storeBoutique = async (req, res) => {
       email:req.body.email,
       mobile:req.body.mobile,
       whatsapp:req.body.whatsapp,
-      dashboard_email:req.body.dashboard_email,
-
+      dashboard_email:dashboard_email,
+      temp_password:hashedPassword,
       // Common fields
       store_name:req.body.store_name,
       pickup_address_1:req.body.pickup_address_1,
@@ -147,6 +169,8 @@ const storeBoutique = async (req, res) => {
       pincode:req.body.pincode,
       city_id:req.body.city_id,
       state_id:req.body.state_id,
+      country_id:req.body.country_id,
+      pickup_contact_type:req.body.pickup_contact_type,
       pickup_contact_person:req.body.pickup_contact_person,
       pickup_phone:req.body.pickup_phone,
 
@@ -168,6 +192,7 @@ const storeBoutique = async (req, res) => {
         source_from_zarkha: req.body.source_from_zarkha,
         margin_percent: req.body.margin_percent,
         self_pricing_enabled: req.body.self_pricing_enabled,
+        has_branches: req.body.has_branches,
         return_policy:  req.body.return_policy,
         delivery_partner_preference: req.body.delivery_partner_preference,
         operating_days: req.body.operating_days ? req.body.operating_days: [],
@@ -185,11 +210,6 @@ const storeBoutique = async (req, res) => {
       created_by:decoded.userId,
       status:req.body.status
     };
-
-    if(req.body.temp_password) {
-       let password = await bcrypt.hash(req.body.temp_password, 10)
-       partnerData.temp_password = password;
-    }
 
     console.log("partner data",partnerData);
 
@@ -214,9 +234,33 @@ const storeBoutique = async (req, res) => {
         partnerData.boutique.store_logo = store_logo;
     }
 
-    const result = req.body.id
-      ? await Partner.findByIdAndUpdate(req.body.id, partnerData, { new: true })
-      : await new Partner(partnerData).save();
+   let result;
+    if (req.body.id) {
+      result = await Partner.findByIdAndUpdate(req.body.id, partnerData, { new: true });
+       let oldPartner = await Partner.findById(req.body.id);
+      await logAudit({
+        action: 'update',
+        entity_type: 'Partner',
+        entity_id: req.body.id,
+        entity_name: partnerData.name,
+        old_value: oldPartner,
+        new_value: partnerData,
+        remarks: 'Partner details updated',
+        user_id: decoded.userId
+      });
+    } else {
+      result = await new Partner(partnerData).save();
+
+      await logAudit({
+        action: 'create',
+        entity_type: 'Partner',
+        entity_id: result._id,
+        entity_name: result.name,
+        new_value: partnerData,
+        remarks: 'New partner created',
+        user_id: decoded.userId
+      });
+    }
 
     return res.status(200).json({
       status: true,
@@ -242,15 +286,14 @@ const Edit = async (req, res) => {
         const partner = await Partner.findById(PartnerId);
 
          // Fetch only India from countries collection
-        const country = await Country.findOne({ name: "India" });
-        // Fetch only states belonging to India
-        const states = await State.find({ country_id: country._id });
+        const country = await Country.find();
+      
 
         console.log(partner,"partner data");
         if (!partner) {
               return res.redirect('/partner');
         }
-          res.render('partner/create', { partner,country,states, message: "" });
+          res.render('partner/create', { partner,country, message: "" });
 
     }
     catch (error) {

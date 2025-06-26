@@ -93,8 +93,12 @@ $(document).ready(function () {
       success: function (response) {
         if (response.status) {
           // successMsg('Successfully', response.message);
-          alert(response.message);
-          window.location.href = response.redirect_url;
+          toastr.success(response.message, 'Success', {
+            positionClass: 'toast-top-right',
+            timeOut: 5000
+          });
+          form.reset();
+          $('.is-invalid').removeClass('is-invalid');
         } else {
           const errors = response.errors;
           for (const field in errors) {
@@ -105,7 +109,10 @@ $(document).ready(function () {
         }
       },
       error: function (xhr) {
-        alert('Something went wrong. Please try again.');
+        toastr.error('Something went wrong. Please try again.', 'Error', {
+          positionClass: 'toast-bottom-center',
+          timeOut: 5000
+        });
         console.log(xhr.responseText);
       }
     });

@@ -3,6 +3,8 @@ const Brands = require('../models/Brands');
 const Category = require('../models/Category');
 const Industry = require('../models/Industry');
 const Hashtag = require('../models/Hashtag');
+const XLSX = require('xlsx');
+const fs = require('fs');
 
 const List = async(req,res)=>{
     try{
@@ -224,4 +226,160 @@ const FilterBrandGet = async (req, res) => {
   }
 };
 
-module.exports = {List,Create,Store,Edit,Delete,FilterBrandGet};
+
+const BrandsExport = async (req, res) => {
+  try {
+    const brands = await Brands.find()
+      .populate('industry_id')
+      .populate('category_id')
+      .populate('hash_tags')
+      .lean();
+
+    if (!brands || brands.length === 0) {
+      return res.status(404).send('No Brands found to export.');
+    }
+
+    // Prepare export data
+      const exportData = brands.map((brand, index) => ({
+      SNo: index + 1,
+      Industry: brand.industry_id.name || '',
+      Category: brand.category_id.name || '',
+      Name: brand.name || '',
+      Slug: brand.slug || '',
+      Description: brand.description || '',
+      Status: brand.status || 'inactive',
+      Hashtags: (brand.hash_tags || []).map(ht => ht.name).join(', '),
+      meta_title: brand.seo?.meta_title || '',
+      meta_description: brand.seo?.meta_description || '',
+      meta_keyword: brand.seo?.meta_keyword || '',
+      Status: brand.status || 'inactive',
+      CreatedAt: brand.created_at ? new Date(brand.created_at).toLocaleString() : '',
+    }));
+
+
+    // Convert to worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Brands');
+
+    // Write to buffer
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Send response
+    res.setHeader('Content-Disposition', 'attachment; filename="brands.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    return res.send(buffer);
+
+  } catch (error) {
+    console.error('Brands export error:', error);
+    return res.status(500).send('Failed to export Brands.');
+  }
+};
+
+const BrandsImport = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const filePath = req.file.path;
+
+    // Read Excel/CSV file
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    console.log('File uploaded:', filePath);
+    
+    // Clean up uploaded file
+    fs.unlinkSync(filePath);
+
+    const inserted = [];
+    const skipped = [];
+
+    for (const row of rows) {
+       console.log("row",row);
+      const { industry_id,category_id,name,description,status,meta_title,meta_description,meta_keyword,hashtags } = row;
+
+      if (!name || !status || !category_id || !industry_id) {
+        skipped.push({ name, reason: 'Missing name or status or category id or industry id' });
+        continue;
+      }
+
+      const slug = name.trim().toLowerCase().replace(/\s+/g, '-');
+
+      // Check for duplicates
+      const existingbrands = await Brands.findOne({ name: name.trim() });
+      if (existingbrands) {
+        skipped.push({ name, reason: 'Already exists' });
+        continue;
+      }
+
+      // Parse comma-separated hashtag IDs and fetch active ones
+      let hashTagIds = [];
+
+      if (hashtags && String(hashtags).trim() !== '') {
+            const ids = String(hashtags)
+              .split(',')
+              .map(id => id.trim())
+              .filter(id => id);
+
+                console.log("after filter hashids",ids);
+
+            // Fetch only active hashtags
+            const validHashtags = await Hashtag.find({
+              _id: { $in: ids },
+              status: 'active' // or true if your schema uses boolean
+            }).select('_id');
+
+            console.log("valid hashtag ids",validHashtags);
+
+            hashTagIds = validHashtags.map(tag => tag._id);
+          }
+
+
+          // Download image from URL
+          let savedImage = '';
+          // let categoryUploadPath = path.join(__dirname, '../uploads/category');
+          // console.log("category upload path",categoryUploadPath);
+          // if (image && image.startsWith('http')) {
+          //   try {
+          //     savedImage = await downloadImageFromUrl(image, categoryUploadPath);
+          //   } catch (err) {
+          //     console.warn(`Image download failed for ${name}: ${err.message}`);
+          //     skipped.push({ name, reason: 'Image download failed' });
+          //     continue;
+          //   }
+          // }
+
+
+      // Insert new Industry
+      await Brands.create({
+          industry_id,
+          category_id,
+          name,
+          slug,
+          description,
+          status: status,
+          seo: {
+                  meta_title: meta_title || '',
+                  meta_description: meta_description || '',
+                  meta_keywords: meta_keyword || ''
+                },
+        hash_tags: hashTagIds
+      });
+
+      inserted.push(name.trim());
+    }
+
+    return res.json({
+      message: `Import completed: ${inserted.length} inserted, ${skipped.length} skipped`,
+      inserted,
+      skipped
+    });
+
+  } catch (err) {
+    console.error('Import error:', err);
+    return res.status(500).json({ error: 'Import failed', details: err.message });
+  }
+};
+
+module.exports = {List,Create,Store,Edit,Delete,FilterBrandGet,BrandsImport,BrandsExport};
