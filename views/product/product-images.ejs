@@ -1,0 +1,49 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Products Images</h2>
+      </div>
+      
+       <!--  product images list show here and delete option show card view   -->
+         <div class="card-body">
+  <div class="row">
+    <% if (productImages && productImages.length > 0) { %>
+      <% productImages.forEach((img, index) => { %>
+        <div class="col-md-3 mb-4">
+          <div class="card h-100 shadow-sm">
+            <img src="<%= BASE_URL %><%= img.image_path %>" class="card-img-top" alt="Product Image" style="height: 200px; object-fit: cover;">
+            <div class="card-body text-center">
+              <p class="mb-1 small text-muted">Uploaded: <%= new Date(img.uploaded_at).toLocaleDateString() %></p>
+              <p class="small mb-1 text-truncate">
+                <strong>Image Name:</strong><br>
+                <%= img.image_path.split('/').pop() %>
+              </p>
+
+              <form method="POST" action="/product/image/delete/<%= img._id %>" onsubmit="return confirm('Are you sure you want to delete this image?')">
+                <button class="btn btn-sm btn-danger" type="submit"><i class="fas fa-trash"></i> Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="col-12">
+        <p class="text-center text-muted">No product images found.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+            
+    </div>
+
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

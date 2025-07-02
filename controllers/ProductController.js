@@ -7,26 +7,70 @@ const Units = require('../models/Units');
 const Product = require('../models/Product'); // Your Product model
 const Variant = require('../models/Variant');
 const ColorImage = require('../models/ColorImage');
+const ProductImage = require('../models/ProductImage');
 const Hashtag = require('../models/Hashtag');
+const AttributeValue = require('../models/AttributeValue');
+const AttributeType = require('../models/AttributeType');
 const path = require('path');
+const fs = require('fs');
 
-const List = async(req,res)=>{
-    try{
-        // Fetch all admin users from the collection
-         const products = await Product.find()
-                                   .populate('industry_id')
-                                   .populate('category_id')
-                                   .populate('subcategory_id')
-                                   .populate('brand_id')
-                                   .populate('product_tags')
-                                  .sort({ createdAt: -1 }); // optional sorting
+const List = async (req, res) => {
+  try {
+    const { industry, category, status, page = 1, limit = 10, search = '' } = req.query;
 
-        res.render('product/index', { products, message: "" });
-    }
-    catch(error){
-        console.log(error.message);
-    }
-}
+    const filter = {};
+
+    if (industry) filter.industry_id = industry;
+    if (category) filter.category_id = category;
+    if (status) filter.status = status;
+    if (search) filter.name = { $regex: search, $options: 'i' };  // case-insensitive search on name
+
+    const skip = (page - 1) * limit;
+
+    // Count total filtered documents
+    const totalCount = await Product.countDocuments(filter);
+
+    // Fetch paginated filtered data
+    const productsWithCount = await Product.find(filter)
+      .populate('industry_id')
+      .populate('category_id')
+      .populate('subcategory_id')
+      .populate('brand_id')
+      .populate('product_tags')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+      // For each product fetch variant count (not recommended for large lists)
+      const products = await Promise.all(productsWithCount.map(async (product) => {
+        const variantCount = await Variant.countDocuments({ product_id: product._id });
+        return { ...product.toObject(), total_variants: variantCount };
+      }));
+
+     
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Fetch industries and categories for filters
+    const industries = await Industry.find({ status: 'active' }).sort({ name: 1 });
+    const categories = await Category.find({ status: 'active' }).sort({ name: 1 });
+
+    res.render('product/index', {
+      products,
+      currentPage: parseInt(page),
+      totalPages,
+      totalCount,
+      filters: { industry, category, status, search },
+      industries,
+      categories,
+      message: "",
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+};
+
 
 const Create = async(req,res)=>{
         try{
@@ -44,8 +88,10 @@ const Create = async(req,res)=>{
 
             const hashtag = await Hashtag.find({ status: 'active' });
 
+            const attributetype = await AttributeType.find({ status: 'active' });
+
             // Render the create page with the industries
-            res.render('product/create', { product,categorys,industries,subcategory,brands,units,hashtag, message: "" });
+            res.render('product/create', { product,categorys,industries,subcategory,brands,units,hashtag,attributetype, message: "" });
         }
         catch(error){
             console.log(error.message);
@@ -73,16 +119,7 @@ const Store = async (req, res) => {
       brand_id,
       product_name,
       description,
-      image_type,
-      color_name,
-      image_group_ids,
-      has_variants,
-      variant_types,
-      attribute_value,
-      variant_skus,
-      variant_prices,
-      variant_discount_prices,
-      variant_stocks,
+      variant_json,
       return_allowed,
       return_notes,
       seo_title,
@@ -91,33 +128,24 @@ const Store = async (req, res) => {
       status
     } = req.body;
 
-    // ----------- BASIC VALIDATION ------------
-    let errors = {};
-
+    // ----------- VALIDATION ------------
+    const errors = {};
     if (!industry_id) errors.industry_id = 'Industry is required';
     if (!category_id) errors.category_id = 'Category is required';
     if (!subcategory_id) errors.subcategory_id = 'Subcategory is required';
+    if (!product_name?.trim()) errors.product_name = 'Product name is required';
     if (!description) errors.description = 'Description is required';
-    if (!product_name || product_name.trim() === '') errors.product_name = 'Product name is required';
-    if (!image_type || !['color', 'general'].includes(image_type)) errors.image_type = 'Invalid image type';
-    if (has_variants === 'yes') {
-      if (!variant_types || !attribute_value || !variant_prices || !variant_discount_prices || !variant_skus) {
-        errors.variants = 'Variant fields are incomplete';
-      }
-    }
+        if (!id) {
+    if (!variant_json) errors.variant_json = 'Variant data is required';
+        }
 
     if (Object.keys(errors).length > 0) {
-      return res.status(422).json({
-        status: false,
-        message: 'Validation failed',
-        errors
-      });
+      return res.status(422).json({ status: false, message: 'Validation failed', errors });
     }
 
     const slug = slugify(product_name);
+    const existingProduct = await Product.findOne({ slug });
 
-    // Check if product name already exists
-    let existingProduct = await Product.findOne({ slug });
     if (existingProduct && (!id || existingProduct._id.toString() !== id)) {
       return res.status(400).json({
         status: false,
@@ -125,86 +153,7 @@ const Store = async (req, res) => {
       });
     }
 
-    const allFiles = req.files || [];
-
-    // ----------- COLOR IMAGES HANDLING ------------
-    let color_images = [];
-
-    console.log('request files:', req.files);
-    if (image_type === 'color') {
-       const groupIds = Array.isArray(image_group_ids) ? image_group_ids : [image_group_ids];
-        const colorNames = Array.isArray(color_name) ? color_name : [color_name];
-
-        groupIds.forEach((groupId, index) => {
-          const color = colorNames[index] || null;
-          const fieldKey = `product_images_${groupId}[]`; // Important fix here
-          const images = allFiles
-            .filter(f => f.fieldname === fieldKey)
-            .map(f => f.filename);
-
-          if (images.length > 0) {
-            color_images.push({ color, images });
-          }
-        });
-    } else if (image_type === 'general') {
-      const images = allFiles
-        .filter(f => f.fieldname === 'product_images')
-        .map(f => f.filename);
-
-      console.log("general images", images);
-      console.log("general images Files data", allFiles);
-
-      if (images.length > 0) {
-        color_images.push({ color: null, images });
-      }
-    }
-    
-
-    // ----------- VARIANTS PROCESSING ------------
-    let variants = [];
-    if (has_variants === 'yes') {
-      const types = Array.isArray(variant_types) ? variant_types : [variant_types];
-      const values = Array.isArray(attribute_value) ? attribute_value : [attribute_value];
-      const skus = Array.isArray(variant_skus) ? variant_skus : [variant_skus];
-      const prices = Array.isArray(variant_prices) ? variant_prices : [variant_prices];
-      const discounts = Array.isArray(variant_discount_prices) ? variant_discount_prices : [variant_discount_prices];
-      const stocks = Array.isArray(variant_stocks) ? variant_stocks : [variant_stocks];
-
-      for (let i = 0; i < values.length; i++) {
-        if (!types[i] || !values[i]) continue;
-        variants.push({
-          attribute_name: types[i],
-          attribute_value: values[i],
-          product_sku: skus[i] || '',
-          product_price: parseFloat(prices[i] || 0),
-          discount_price: parseFloat(discounts[i] || 0),
-          stock: parseInt(stocks[i] || 0),
-        });
-      }
-    }else{
-        const types = Array.isArray(variant_types) ? variant_types : [variant_types];
-        const values = Array.isArray(attribute_value) ? attribute_value : [attribute_value];
-        const skus = Array.isArray(variant_skus) ? variant_skus : [variant_skus];
-        const prices = Array.isArray(variant_prices) ? variant_prices : [variant_prices];
-        const discounts = Array.isArray(variant_discount_prices) ? variant_discount_prices : [variant_discount_prices];
-        const stocks = Array.isArray(variant_stocks) ? variant_stocks : [variant_stocks];
-
-        for (let i = 0; i < values.length; i++) {
-          
-          variants.push({
-            attribute_name: types[i] || '',
-            attribute_value: values[i] || '',
-            product_sku: skus[i] || '',
-            product_price: parseFloat(prices[i] || 0),
-            discount_price: parseFloat(discounts[i] || 0),
-            stock: parseInt(stocks[i] || 0),
-          });
-        }
-    }
-
-    console.log('color_images:', color_images);
-    console.log('has_variants:', has_variants);
-    // ----------- PRODUCT DATA ASSEMBLY ------------
+    // ----------- PRODUCT SAVE / UPDATE ------------
     const productData = {
       industry_id,
       category_id,
@@ -213,30 +162,58 @@ const Store = async (req, res) => {
       name: product_name,
       slug,
       description,
-      image_type,
-      has_variants,
-      color_images,
-      variants,
       return_allowed,
       return_notes,
       seo_title,
       seo_description,
       product_tags: Array.isArray(product_tags)
-                    ? product_tags
-                    : typeof product_tags === 'string' && product_tags.trim() !== ''
-                      ? [product_tags]
-                      : [],
+        ? product_tags
+        : typeof product_tags === 'string' && product_tags.trim() !== ''
+          ? [product_tags]
+          : [],
       status,
       updated_at: new Date()
     };
 
     let savedProduct;
+
     if (id) {
       savedProduct = await Product.findByIdAndUpdate(id, productData, { new: true });
     } else {
       productData.created_at = new Date();
       const newProduct = new Product(productData);
       savedProduct = await newProduct.save();
+    }
+
+    // ----------- VARIANTS PARSING + SAVE ------------
+    let variantsToSave = [];
+    
+    try {
+       if(variant_json){
+          const parsedVariants = JSON.parse(variant_json);
+          for (const v of parsedVariants) {
+            variantsToSave.push({
+              product_id: savedProduct._id,
+              attribute_name: v.type,
+              attribute_value: v.value,  // Save the whole comma-separated string as is
+              product_sku: v.sku || '',
+              product_price: parseFloat(v.price || 0),
+              discount_price: parseFloat(v.discount || 0),
+              product_stock: parseInt(v.stock || 0),
+              color_code: v.color || '',
+              image_ids: Array.isArray(v.images) ? v.images : [],
+            });
+          }
+       }
+    } catch (err) {
+      return res.status(400).json({
+        status: false,
+        message: 'Invalid JSON format for variants',
+      });
+    }
+
+    if (variantsToSave.length > 0) {
+      await Variant.insertMany(variantsToSave);
     }
 
     return res.status(id ? 200 : 201).json({
@@ -256,127 +233,238 @@ const Store = async (req, res) => {
   }
 };
 
+
 const Edit = async (req, res) => {
-    try {
-        const ProductId = req.params.id;
-        // Find the user by ID
-        const product = await Product.findById(ProductId);
+  try {
+    const ProductId = req.params.id;
+    // Find the product by ID and populate references if needed
+    const product = await Product.findById(ProductId);
 
-         const industries = await Industry.find({ status: 'active' });
-
-            const categorys = await Category.find({ status: 'active' });
-
-            const subcategory = await Subcategory.find({ status: 'active' });
-            
-            const brands = await Brands.find({ status: 'active' });
-
-            const units = await Units.find({ status: 'active' });
-             const hashtag = await Hashtag.find({ status: 'active' });
-
-        // console.log(product,"product data");
-        if (!product) {
-              return res.redirect('/product');
-        }
-          res.render('product/create', { product,categorys,subcategory,brands,units,industries,hashtag, message: "" });
-
+    if (!product) {
+      return res.redirect('/product');
     }
-    catch (error) {
-        console.error(error.message);
-        return res.redirect('/product');
-    }
+
+    // Fetch all variants linked to this product
+    const variants = await Variant.find({ product_id: ProductId });
+
+    // Fetch other related data
+    const industries = await Industry.find({ status: 'active' });
+    const categorys = await Category.find({ status: 'active' });
+    const subcategory = await Subcategory.find({ status: 'active' });
+    const brands = await Brands.find({ status: 'active' });
+    const units = await Units.find({ status: 'active' });
+    const hashtag = await Hashtag.find({ status: 'active' });
+    const attributetype = await AttributeType.find({ status: 'active' });
+
+    res.render('product/edit', { 
+      product,
+      categorys,
+      subcategory,
+      brands,
+      units,
+      industries,
+      hashtag,
+      attributetype,
+      variants,   // pass variants here
+      message: "" 
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    return res.redirect('/product');
+  }
 }
 
 const View = async (req, res) => {
-    try {
-        const ProductId = req.params.id;
+  try {
+    const ProductId = req.params.id;
 
-        console.log(ProductId,"product id");
-        // Find the user by ID
-        const product = await Product.findById(ProductId)
-                                   .populate('industry_id')
-                                   .populate('category_id')
-                                   .populate('subcategory_id')
-                                   .populate('product_tags')
-                                   .populate('brand_id');
-        if (!product) {
-              return res.redirect('/product');
-        }
+    const product = await Product.findById(ProductId)
+      .populate('industry_id')
+      .populate('category_id')
+      .populate('subcategory_id')
+      .populate('product_tags')
+      .populate('brand_id');
 
-        console.log(product,"product data");
-          res.render('product/view', { product, message: "" });
-
+    if (!product) {
+      return res.redirect('/product');
     }
-    catch (error) {
-        console.error(error.message);
-        return res.redirect('/product');
-    }
-}
+
+    // fetch variants associated with this product
+    const variants = await Variant.find({ product_id: ProductId }).populate('image_ids');
+
+    res.render('product/view', { product, variants, message: "" });
+
+  } catch (error) {
+    console.error(error.message);
+    return res.redirect('/product');
+  }
+};
 
 
 const ProductImageDelete = async (req, res) => {
-  try {
-    const { productId, colorIndex, imageIndex, image } = req.body;
+   try {
+    const imageId = req.params.id;
+    const image = await ProductImage.findById(imageId);
+    if (!image) return res.status(404).send("Image not found");
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.json({ success: false, message: 'Product not found' });
+    const filePath = path.join(__dirname, '../public/uploads/product-image/', image.image_path);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
 
-    // Remove image from array
-    if (
-      product.color_images[colorIndex] &&
-      product.color_images[colorIndex].images[imageIndex] === image
-    ) {
-      product.color_images[colorIndex].images.splice(imageIndex, 1);
-
-      // Save product after image removal
-      await product.save();
-
-      // Delete file from filesystem
-      const imagePath = path.join(__dirname, 'uploads/product-image/', image);
-      console.log("image path", imagePath);
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
-
-      return res.json({ success: true, message: 'Image deleted' });
-    }
-
-    return res.json({ success: false, message: 'Image not found in list' });
-
-  } catch (error) {
-    console.error(error);
-    return res.json({ success: false, message: 'Something went wrong' });
+    await ProductImage.findByIdAndDelete(imageId);
+    res.redirect('/product-images');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting image");
   }
 }
 
 const Delete = async (req, res) => {
- try {
-        const productId = req.params.id;
-        // Find the user by ID
-        const productidd = await Product.findById(productId);
-        if (!productidd) {
-           return res.redirect('/product');
-        }
+  try {
+    const productId = req.params.id;
 
-        // Delete the user
-        await Product.findByIdAndDelete(productidd);
-
-        // Redirect to the admin user list with a success message
-        req.flash('success', 'Product deleted successfully');
-       return res.redirect('/product');
-
-    }
-    catch (error) {
-        console.error(error.message);
-        return res.redirect('/product');
+    // Check if the product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      req.flash('error', 'Product not found');
+      return res.redirect('/product');
     }
 
-}
+    // Delete the product
+    await Product.findByIdAndDelete(productId);
+
+    // Delete related variants
+    await Variant.deleteMany({ product_id: productId });
+
+
+    return res.redirect('/product');
+
+  } catch (error) {
+    console.error(error.message);
+    req.flash('error', 'Something went wrong');
+    return res.redirect('/product');
+  }
+};
+
 const ProductBulkImport = async(req, res) => {
 
        res.render('product/bulk-import', {message: "" });
 }
 
-module.exports = {List,Create,Store,Edit,View,Delete,ProductImageDelete,ProductBulkImport};
+const GetattributeValue = async (req, res) => {
+  try {
+    const { type } = req.query;
+    if (!type) {
+      return res.status(400).json({ status: false, message: "Attribute type is required" });
+    }
+
+    // Find type_id by name (e.g., 'Size')
+    const attributeType = await AttributeType.findOne({ name: type });
+
+    if (!attributeType) {
+      return res.status(404).json({ status: false, message: "Attribute type not found" });
+    }
+
+    // Fetch values matching the type_id
+    const values = await AttributeValue.find({ type_id: attributeType._id }).select('value _id');
+    if (!values || values.length === 0) {
+      return res.status(404).json({ status: false, message: "No attribute values found for this type" });
+    }
+
+    return res.json({ status: true, data:values  });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: 'Server error' });
+  }
+};
+
+const GetProductImages = async (req, res) => {
+  try {
+  
+
+    const productImages = await  ProductImage.find().sort({ uploaded_at: -1 });
+    if (!productImages || productImages.length === 0) {
+      return res.status(404).json({ status: false, message: "Product not found" });
+    }
+
+    return res.json({ status: true, data: productImages });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: 'Server error' });
+  }
+};
+
+
+
+const UploadProductImages = async (req, res) => {
+  try {
+    const files = req.files;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ status: false, message: 'No images uploaded' });
+    }
+
+    const uploadedImages = [];
+
+    for (const file of files) {
+      const imagePath = `/uploads/product-image/${file.filename}`;
+
+      const imageDoc = new ProductImage({
+        image_path: imagePath,
+        uploaded_by: req.user ? req.user._id : null // if using authMiddleware
+      });
+
+      await imageDoc.save();
+      uploadedImages.push(imageDoc);
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: 'Images uploaded successfully',
+      data: uploadedImages
+    });
+
+  } catch (err) {
+    console.error('UploadProductImages error:', err);
+    return res.status(500).json({
+      status: false,
+      message: 'Server error while uploading images'
+    });
+  }
+};
+
+const ProductImagesList = async (req, res) => {
+  try {
+    const productImages = await ProductImage.find().sort({ uploaded_at: -1 });
+    if (!productImages || productImages.length === 0) {
+      return res.status(404).json({ status: false, message: "No product images found" });
+    }
+
+    return res.render('product/product-images', { productImages, message: "" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: false, message: 'Server error' });
+  }
+};
+
+const DeleteVariant = async (req, res) => {
+  try {
+    const variantId = req.params.id;
+
+    // Find the variant by ID
+    const variant = await Variant .findById(variantId);
+    if (!variant) { 
+      return res.status(404).json({ status: false, message: 'Variant not found' });
+    }
+    // Delete the variant
+    await Variant.findByIdAndDelete(variantId); 
+    return res.status(200).json({ status: true, message: 'Variant deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: false, message: 'Server error' });
+  } 
+}
+
+module.exports = {List,Create,Store,Edit,View,Delete,ProductImageDelete,ProductBulkImport,GetattributeValue,GetProductImages,UploadProductImages,ProductImagesList,DeleteVariant};

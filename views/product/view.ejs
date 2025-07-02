@@ -99,7 +99,7 @@
         </div>
         <div class="card-body product_details">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <h4>Name: <%= product.name %></h4>
                     <p><strong>Industry:</strong> <%= product.industry_id ? product.industry_id.name : 'N/A' %></p>
                     <p><strong>Category:</strong> <%= product.category_id ? product.category_id.name : 'N/A' %></p>
@@ -118,47 +118,40 @@
                         <% } %>
                     </p>
                 </div>
-                <div class="col-md-6">
-                    <% if (product.color_images && product.color_images.length > 0) { %>
-                        <h5>Images by Color:</h5>
-                        <% product.color_images.forEach(colorGroup => { %>
-                        <div class="mb-3">
-                            <strong><%= colorGroup.color %></strong><br>
-                            <% if (colorGroup.images && colorGroup.images.length > 0) { %>
-                            <% colorGroup.images.forEach(img => { %>
-                                <img src="<%= BASE_URL %>/uploads/product-image/<%= img %>" 
-                                    alt="<%= colorGroup.color %>" 
-                                    class="img-fluid mb-2 me-2" 
-                                    style="max-width: 100px; border: 1px solid #ccc; border-radius: 5px;" />
-                            <% }) %>
-                            <% } else { %>
-                            <p>No images for <%= colorGroup.color %></p>
-                            <% } %>
-                        </div>
-                        <% }) %>
-                    <% } else { %>
-                        <p>No color images available</p>
-                    <% } %>
-                </div>
+                
 
 
             </div>
 
-            <% if (product.variants && product.variants.length > 0) { %>
-                <h4>Variants</h4>
-                <ul class="list-group">
-                    <% product.variants.forEach(variant => { %>
-                        <li class="list-group-item">
-                            <strong><%= variant.attribute_name %></strong> - <%= variant.attribute_value %><br />
-                            <strong>Product Price (INR)</strong> - <%= variant.product_price %><br />
-                            <strong>Discount Price (INR)</strong> - <%= variant.discount_price %><br />
-                            <strong>Product Sku</strong> - <%= variant.product_sku %>
-                        </li>
-                    <% }) %>
-                </ul>
+           <% if (variants && variants.length > 0) { %>
+              <h4>Variants</h4>
+              <ul class="list-group">
+                <% variants.forEach(variant => { %>
+                  <li class="list-group-item">
+                    <strong><%= variant.attribute_name %></strong> - <%= variant.attribute_value %><br />
+                    <strong>Product Price (INR)</strong> - ₹<%= variant.product_price %><br />
+                    <strong>Discount Price (INR)</strong> - ₹<%= variant.discount_price %><br />
+                    <strong>Product SKU</strong> - <%= variant.product_sku %><br />
+                    <strong>Stock</strong> - <%= variant.product_stock %><br />
+                    <strong>Color</strong>:
+                    <div style="display: inline-block; width: 20px; height: 20px; background: <%= variant.color_code %>; border: 1px solid #000;"></div><br />
+                    
+                    <% if (variant.image_ids && variant.image_ids.length > 0) { %>
+                      <div class="mt-2 d-flex flex-wrap">
+                        <% variant.image_ids.forEach(image => { %>
+                          <img src="<%= BASE_URL %><%= image.image_path %>" class="img-thumbnail me-2" style="max-width: 80px;">
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <p>No images</p>
+                    <% } %>
+                  </li>
+                <% }) %>
+              </ul>
             <% } else { %>
-                <p>No variants available for this product.</p>
+              <p>No variants available for this product.</p>
             <% } %>
+
 
              <hr>
             <div class="row">

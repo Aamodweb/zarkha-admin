@@ -1,0 +1,131 @@
+<%- include('../layout/header') %>
+
+<div class="content">
+  <div class="page-container">
+
+    <div class="card">
+
+      <!-- Header: Title, Search, Add Button -->
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap header-container">
+        <h2 class="page-title">Attribute Type List</h2>
+
+        <div class="header-controls">
+          <!-- <div class="input-group search-group">
+            <input
+              type="text"
+              id="userSearch"
+              class="form-control"
+              placeholder="Search cms setting..."
+              aria-label="Search cms setting"
+            />
+            <button class="btn btn-primary" id="searchBtn" type="button">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div> -->
+           <div>
+             <a href="/attribute-type/create" class="btn btn-add btn-primary">+ Add Attribute Type</a>
+           </div>
+        </div>
+       
+      </div>
+
+      <!-- Responsive Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+         <tbody>
+             <% if (attribute_type_list && attribute_type_list.length > 0) { %>
+                <% attribute_type_list.forEach((attribute_type, index) => { %>
+                    <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= attribute_type.name ? attribute_type.name : '' %></td>
+                    <td>
+                       <% if (attribute_type.status === 'active') { %>
+                        <span class="status active"><%= attribute_type.status %></span>
+                        <% } else { %>
+                        <span class="status inactive"><%= attribute_type.status %></span> 
+                        <% } %>
+                    </td>
+                    <td>
+                        <a href="<%= BASE_URL %>/attribute-type/edit/<%= attribute_type.id %>" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="<%= BASE_URL %>/attribute-type/delete/<%= attribute_type.id %>" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                    </tr>
+                <% }) %>
+                <% } else { %>
+                <tr><td class="text-center" colspan="5">No data found</td></tr>
+                <% } %>
+            </tbody>
+      </table>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importCSVModal" tabindex="-1" aria-labelledby="importCSVLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="importCSVForm" enctype="multipart/form-data">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="importCSVLabel">Import States via Excel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+           <div class="mb-2 text-end">
+              <a href="<%= BASE_URL %>/uploads/sample/state-sample.xlsx" class="btn btn-sm btn-outline-primary" download>
+                <i class="fas fa-download"></i> Download Sample
+              </a>
+            </div>
+          <div class="mb-3">
+            <label for="csvFile" class="form-label">Select Excel File <span style="color:red">( only .xlsx file allow)</span> </label>
+            <input class="form-control" type="file" id="csvFile" name="csvFile" accept=".xlsx" required />
+          </div>
+          <div id="importResult" class="text-success small mt-2"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Upload</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<%- include('../layout/footer') %>
+<script>
+  $('#importCSVForm').on('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: '/state/import-xlsx',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      beforeSend: () => {
+        $('#importResult').removeClass('text-danger').text('Uploading...');
+      },
+      success: function (res) {
+        $('#importResult').text('State imported successfully!');
+        setTimeout(() => {
+          $('#importCSVModal').modal('hide');
+          location.reload();
+        }, 1000);
+      },
+      error: function (err) {
+        $('#importResult').addClass('text-danger').text('Failed to import CSV.');
+      }
+    });
+  });
+</script>

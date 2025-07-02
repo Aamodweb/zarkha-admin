@@ -7,6 +7,15 @@
   .image_upperbox{
     gap:8px;
   }
+  table thead tr th {
+    color:black
+  }
+  .select2-container .select2-selection--single{
+    height:37px !important;
+  }
+  .select2-container .select2-selection--multiple{
+    min-height:38px !important;
+  }
 </style>
 <div class="content">
 <div class="container mt-4">
@@ -27,8 +36,8 @@
             <% } %>
         <div class="row mb-3">
             <div class="col-md-4 mb-2">
-              <label for="industry" class="form-label">Industry</label>
-              <select name="industry_id" id="industryDropdown" class="form-control" required>
+              <label for="industry" class="form-label">Industry <span class="mandatory">*</span></label>
+              <select name="industry_id" id="industryDropdown" class="form-control" data-required="Industry">
                  <option value="">Select one</option>
                 <% industries.forEach(ind => { %>
                   <option value="<%= ind._id %>"  <% if (product && String(product.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
@@ -36,21 +45,21 @@
               </select>
             </div>
              <div class="col-md-4 mb-2">
-              <label for="category" class="form-label">Category</label>
-              <select name="category_id" id="categoryDropdown" class="form-control" data-selected="<%= product ? product.category_id : '' %>" required>
+              <label for="category" class="form-label">Category <span class="mandatory">*</span></label>
+              <select name="category_id" id="categoryDropdown" class="form-control" data-selected="<%= product ? product.category_id : '' %>" data-required="Category">
                  <option value="">Select one</option>
                 
               </select>
             </div>
             <div class="col-md-4 mb-2">
-              <label for="subcategory" class="form-label">SubCategory</label>
+              <label for="subcategory" class="form-label">SubCategory <span class="mandatory">*</span></label>
               <!-- Subcategory Dropdown -->
-              <select name="subcategory_id" id="subcategoryDropdown" class="form-control" data-selected="<%= product ? product.subcategory_id : '' %>">
+              <select name="subcategory_id" id="subcategoryDropdown" class="form-control" data-selected="<%= product ? product.subcategory_id : '' %>" data-required="SubCategory">
                 <option value="">Select one</option>
               </select>
             </div>
             <div class="col-md-6 mb-2">
-              <label for="brands_id" class="form-label">Brands</label>
+              <label for="brands_id" class="form-label">Brands </label>
                 <!-- Brand Dropdown (if needed instead) -->
                 <select name="brand_id" id="brandDropdown" class="form-control" data-selected="<%= product ? product.brand_id : '' %>">
                   <option value="">Select one</option>
@@ -58,155 +67,114 @@
             </div>
 
             <div class="col-md-6 mb-2">
-              <label for="name" class="form-label">Product Name</label>
-              <input type="text" class="form-control" id="product_name" name="product_name" value="<%= product && product.name ? product.name : '' %>"  placeholder="Enter Product Name" required>
+              <label for="name" class="form-label">Product Name <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="product_name" name="product_name" value="<%= product && product.name ? product.name : '' %>"  placeholder="Enter Product Name" data-required="Product Name">
             </div>
 
             <div class="col-md-12 mb-2">
-              <label for="email" class="form-label">Product Description</label>
-              <textarea name="description" id="description" class="form-control"><%= product && product.description ? product.description : '' %></textarea>
+              <label for="email" class="form-label">Product Description <span class="mandatory">*</span></label>
+              <textarea name="description" id="description" class="form-control" data-required="Product Description"><%= product && product.description ? product.description : '' %></textarea>
             </div>
             
-            <div class="mb-3">
-              <label class="form-label">Do you want to upload images color-wise?</label><br>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="image_type" id="colorWise" value="color" <% if (product) { %> <% if (product.image_type === 'color') { %> checked <% }}else{ %> checked <% } %>>
-                <label class="form-check-label" for="colorWise">Yes (Color-wise)</label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="image_type" id="general" value="general" <% if (product) { %> <% if (product.image_type === 'general') { %> checked <% }}else{ %> general <% } %>>
-                <label class="form-check-label" for="general">No (Same image for all)</label>
-              </div>
-            </div>
+            <!-- Product Variants -->
+              <div class="mb-4">
+                <label class="form-label">Product Variants <span class="mandatory">*</span></label>
+                
+              <div class="row g-3 align-items-end mb-4" id="variantInputRow">
 
-
-            <!-- General Image Upload -->
-            <div class="mb-4 image-upload-section general-upload d-none">
-              <label class="form-label">Upload General Images</label>
-              <input type="file" name="product_images" class="form-control" multiple accept="image/*">
-                <% if (product && product.color_images && product.color_images.length > 0 && product.image_type === 'general') { %>
-                    <% product.color_images.forEach(function(colorItem, colorIndex) { %>
-                      <div class="my-3">
-                        <h5><%= colorItem.color %> Images</h5>
-                        <div class="row">
-                          <% if (colorItem.images && colorItem.images.length > 0) { %>
-                            <% colorItem.images.forEach(function(image, imageIndex) { %>
-                                <div class="col-md-2 text-center mb-3 image-box" data-color-index="<%= colorIndex %>" data-image-index="<%= imageIndex %>">
-                                  <img src="/uploads/product-image/<%= image %>" class="img-fluid rounded" style="height: 120px; object-fit: cover;" alt="Color Image">
-
-                                  <button type="button" class="btn btn-danger btn-sm mt-2 delete-image-btn"
-                                          data-product-id="<%= product._id %>"
-                                          data-color-index="<%= colorIndex %>"
-                                          data-image-index="<%= imageIndex %>"
-                                          data-image="<%= image %>">
-                                    Delete
-                                  </button>
-                                </div>
-                            <% }) %>
-                          <% } %>
-                        </div>
-                      </div>
+                <!-- Attribute Type -->
+                <div class="col-md-4">
+                  <label class="form-label">Attribute Type</label>
+                  <select class="form-select" id="variantType" onchange="fetchAttributeValues()">
+                    <option value="">-- Select Type --</option>
+                    <% attributetype.forEach(attribute => { %>
+                      <option value="<%= attribute.name %>"><%= attribute.name %></option>
                     <% }) %>
-                  <% } %>
-            </div>
-            <!-- Color-wise Image Upload -->
-            <div class="mb-4 image-upload-section color-upload">
-              <label class="form-label">Upload Color-wise Images</label>
-              <div id="colorImageWrapper">
-                <!-- Dynamic color blocks will be added here -->
-                <% if (product && product.color_images && product.color_images.length > 0 && product.image_type === 'color') { %>
-                    <% product.color_images.forEach(function(colorItem, colorIndex) { %>
-                      <div class="row mb-2" id="row-${colorIndex}">
-                        <!-- <div class="col-md-4">
-                          <input type="color" name="color_name[]" value="<%= colorItem && colorItem.color ? colorItem.color : '' %>" class="form-control">
-                        </div> -->
-                        <div class="col-md-12 d-flex image_upperbox">
-                          <!-- <input type="file" name="product_images_${colorIndex}[]" class="form-control" multiple required> -->
-                            <% if (colorItem.images && colorItem.images.length > 0) { %>
-                              <% colorItem.images.forEach(function(image, imageIndex) { %>
-                                <div class="col-md-2 text-center mb-3 image-box" data-color-index="<%= colorIndex %>" data-image-index="<%= imageIndex %>">
-                                  <img src="/uploads/product-image/<%= image %>" class="img-fluid rounded" style="height: 50px; object-fit: cover;" alt="Color Image">
-                                  <button type="button" class="btn btn-danger btn-sm mt-2 delete-image-btn"
-                                          data-product-id="<%= product._id %>"
-                                          data-color-index="<%= colorIndex %>"
-                                          data-image-index="<%= imageIndex %>"
-                                          data-image="<%= image %>">Delete</button>
-                                </div>
-                              <% }) %>
-                            <% } %>
+                  </select>
+                </div>
 
-                        </div>
-                        <!-- <div class="col-md-2">
-                          <button type="button" class="btn btn-danger btn-sm" onclick="$('#row-${colorIndex}').remove()">Remove</button>
-                        </div> -->
-                        <input type="hidden" name="image_group_ids[]" value="${colorIndex}">
-                      </div>
-                    <% }) %>
-                <% } %>
+                <!-- Attribute Values -->
+                <div class="col-md-4">
+                  <label class="form-label">Attribute Values</label>
+                  <select id="attributeValue" class="form-select" multiple="multiple"></select>
+                </div>
+
+                <!-- SKU + Auto -->
+                <div class="col-md-4">
+                  <label class="form-label">SKU</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="variantSKU" placeholder="Leave empty">
+                    <button class="btn btn-secondary" type="button" onclick="generateSKU()">Auto Generate</button>
+                  </div>
+                </div>
+
+                <!-- Discount Price -->
+                <div class="col-md-2">
+                  <label class="form-label">Discount Price</label>
+                  <input type="text" class="form-control only-number" id="discountPrice" step="0.01">
+                </div>
+
+                <!-- Price -->
+                <div class="col-md-2">
+                  <label class="form-label">Price</label>
+                  <input type="text" class="form-control only-number" id="price" step="0.01">
+                </div>
+
+                <!-- Stock -->
+                <div class="col-md-2">
+                  <label class="form-label">Stock</label>
+                  <input type="text" class="form-control only-number" id="stock">
+                </div>
+
+                <!-- Color -->
+                <div class="col-md-1">
+                  <label class="form-label">Color</label>
+                  <input type="color" class="form-control form-control-color" id="colorCode">
+                </div>
+
+                <!-- Select Images Button -->
+                <div class="col-md-2 d-flex flex-column justify-content-end">
+                  <label class="form-label">Images</label>
+                  <button type="button" class="btn btn-outline-secondary" onclick="openImagePicker()">
+                    Select Images (<span id="selectedImageCount">0</span>)
+                  </button>
+                </div>
+
+                <!-- Add Variant Button -->
+                <div class="col-md-2 d-flex flex-column justify-content-end">
+                  <label class="form-label d-none d-md-block">&nbsp;</label>
+                  <button type="button" class="btn btn-primary w-100" onclick="addVariants()">+ Add Variant(s)</button>
+                </div>
               </div>
-              <button type="button" class="btn btn-sm btn-primary" onclick="addColorImageRow()">+ Add Color</button>
-            </div>
 
 
 
+                <!-- Display Added Variants -->
+                <div class="table-responsive mt-4">
+                  <table class="table table-bordered table-striped" id="variantTable">
+                    <thead>
+                      <tr>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                        <th>SKU</th>
+                        <th>Discount</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Color</th>
+                        <th>Images</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Variants will be appended here -->
+                    </tbody>
+                  </table>
+                </div>
 
-           <!-- multipal vairent wise product upload functionality -->
-
-            <div class="mb-3">
-              <label class="form-label d-block">Does this product have variants?</label>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="has_variants" id="variantYes" value="yes" <% if (product) { %> <% if (product.has_variants === 'yes') { %> checked <% }}else{ %> checked <% } %>>
-                <label class="form-check-label" for="variantYes">Yes</label>
+                <!-- Hidden input to store data -->
+                <input type="hidden" name="variant_json" id="variantJson">
               </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="has_variants" id="variantNo" value="no" <% if (product) { %> <% if (product.has_variants === 'no') { %> checked <% }}else{ %> checked <% } %>>
-                <label class="form-check-label" for="variantNo">No</label>
-              </div>
-            </div>
 
-
-           <div class="mb-4" id="variantSection">
-              <label class="form-label">Product Variants</label>
-              <div id="variantContainer">
-                <!-- Variant rows will be dynamically added -->
-              </div>
-              <button type="button" class="btn btn-success btn-sm mt-2" onclick="addVariantRow()">+ Add Variant</button>
-            </div>
-            
-                  <% if (product && product.variants && product.variants.length > 0 && product.has_variants === 'no') { %>
-                    <% product.variants.forEach(function(variantItem, variantIndex) { %>
-
-                      <div class="row mb-4 d-none" id="singleProductFields">
-                        <div class="col-md-4 mb-3">
-                          <label class="form-label">Product SKU</label>
-                          <input type="text" class="form-control" name="variant_skus[]" value="<%= variantItem && variantItem.product_sku ? variantItem.product_sku : '' %>" placeholder="Leave empty to auto-generate">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                          <label class="form-label">Product Price</label>
-                          <input type="number" step="0.01" class="form-control" name="variant_prices[]" value="<%= variantItem && variantItem.product_price ? variantItem.product_price : '' %>" placeholder="Enter price">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                          <label class="form-label">Discount Price</label>
-                          <input type="number" step="0.01" class="form-control" value="<%= variantItem && variantItem.discount_price ? variantItem.discount_price : '' %>" name="variant_discount_prices" placeholder="Enter discount price">
-                        </div>
-                      </div>
-                     <% }) %>
-                  <% }else{ %>
-                      <div class="row mb-4 d-none" id="singleProductFields">
-                        <div class="col-md-4 mb-3">
-                          <label class="form-label">Product SKU</label>
-                          <input type="text" class="form-control" name="variant_skus[]" value="" placeholder="Leave empty to auto-generate">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                          <label class="form-label">Product Price</label>
-                          <input type="number" step="0.01" class="form-control" name="variant_prices[]" value="" placeholder="Enter price">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                          <label class="form-label">Discount Price</label>
-                          <input type="number" step="0.01" class="form-control" value="" name="variant_discount_prices" placeholder="Enter discount price">
-                        </div>
-                      </div>
-                   <% } %>
 
               <div class="mb-3">
                 <label class="form-label">Return Policy</label>
@@ -244,7 +212,7 @@
                   </div>
                   <div class="col-md-4">
                     <label for="status" class="form-label">Status</label>
-                    <select class="form-select" id="status" name="status" required>
+                    <select class="form-select" id="status" name="status" data-required="Status">
                         <option value="">Select status</option>
                         <option value="active" <% if (product && product.status === 'active') { %> selected <% } %>>Active</option>
                         <option value="inactive" <% if (product && product.status === 'inactive') { %> selected <% } %>>Inactive</option>
@@ -266,10 +234,46 @@
 </div>
 
 </div>
+<!-- Image Picker Modal -->
+<div class="modal fade" id="imagePickerModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select Product Images</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label class="form-label">Upload New Images</label>
+          <input type="file" id="newImageUpload" class="form-control" multiple accept="image/*" onchange="uploadNewImages()">
+        </div>
+
+        <div class="row g-3" id="imageGallery">
+          <!-- Image cards will appear here -->
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="confirmImageSelection()">Add Selected</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <%- include('../layout/footer') %>
 <script>
+    document.querySelectorAll('input.only-number').forEach(input => {
+  input.addEventListener('keypress', function (e) {
+    const char = String.fromCharCode(e.which);
+    if (!/[0-9]/.test(char)) {
+      e.preventDefault();
+    }
+  });
+    });
    CKEDITOR.replace('description',{
     versionCheck: false
    });
@@ -296,56 +300,233 @@ function addColorImageRow() {
     $(button).closest('.color-image-row').remove();
   }
 </script>
-
 <script>
-  function addVariantRow() {
-    const html = `
-      <div class="row align-items-end mb-2 variant-row">
-        <div class="col-md-2">
-          <label>Select Attribute</label>
-            <select id="variantType" class="form-select" name="variant_types[]" required>
-              <option value="">-- Select Variant --</option>
-              <option value="Size">Size</option>
-              <option value="Color">Color</option>
-              <option value="Material">Material</option>
-              <option value="Weight">Weight</option>
-              <option value="Capacity">Capacity</option>
-              <option value="Flavor">Flavor</option>
-              <option value="Style">Style</option>
-              <option value="Pack Size">Pack Size</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-          <label>Attribute Value</label>
-          <input type="text" class="form-control" name="attribute_value[]" placeholder="Enter Value" required>
-        </div>
-        <div class="col-md-2">
-          <label>SKU</label>
-          <input type="text" class="form-control" name="variant_skus[]" placeholder="Leave empty to auto-generate" required>
-        </div>
-        <div class="col-md-2">
-          <label>Discount Price</label>
-          <input type="number" class="form-control" name="variant_prices[]" step="0.01" placeholder="e.g., 999.00" required>
-        </div>
-        <div class="col-md-2">
-          <label>Price</label>
-          <input type="number" class="form-control" name="variant_discount_prices[]" step="0.01" placeholder="e.g., 999.00" required>
-        </div>
-        <div class="col-md-2">
-          <label>Stock</label>
-          <input type="number" class="form-control" name="variant_stocks[]" placeholder="e.g., 100" required>
-        </div>
-        <div class="col-md-2">
-          <button type="button" class="btn btn-danger btn-sm mt-4" onclick="removeVariantRow(this)">Remove</button>
-        </div>
-      </div>`;
-    $('#variantContainer').append(html);
+
+  $('#attributeValue').select2({
+        placeholder: "Select or type values",
+        width: '100%',
+        allowClear: true,
+  });
+
+let variants = [];
+
+// SKU generator
+function generateSKU() {
+  document.getElementById("variantSKU").value = 'SKU-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+}
+
+// Fetch attribute values based on selected type
+function fetchAttributeValues() {
+  const type = document.getElementById("variantType").value;
+  const attributeSelect = document.getElementById("attributeValue");
+
+  // Get previously selected values
+  const previousSelections = Array.from(attributeSelect.selectedOptions).map(opt => opt.value);
+
+  // Destroy select2 if already initialized
+  if ($(attributeSelect).hasClass("select2-hidden-accessible")) {
+    $(attributeSelect).select2('destroy');
   }
 
-  function removeVariantRow(button) {
-    $(button).closest('.variant-row').remove();
+  // Clear options
+  attributeSelect.innerHTML = '';
+
+  if (!type) return;
+
+  fetch(`/product/get-attribute-value?type=${type}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.status && Array.isArray(data.data)) {
+        data.data.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val.value;
+          opt.innerText = val.value;
+
+          // Pre-select if it was selected before
+          if (previousSelections.includes(val._id)) {
+            opt.selected = true;
+          }
+
+          attributeSelect.appendChild(opt);
+        });
+
+        // Re-init select2
+        $(attributeSelect).select2({
+          placeholder: "Select attribute values",
+          width: '100%'
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Failed to fetch attribute values:", err);
+    });
+}
+
+
+function addVariants() {
+  const type = document.getElementById("variantType").value;
+  const selectedValues = Array.from(document.getElementById("attributeValue").selectedOptions).map(o => o.value);
+  const sku = document.getElementById("variantSKU").value;
+  const discount = document.getElementById("discountPrice").value;
+  const price = document.getElementById("price").value;
+  const stock = document.getElementById("stock").value;
+  const color = document.getElementById("colorCode").value;
+
+  if (!type || selectedValues.length === 0 || !price || !stock) {
+    alert("Please fill all required fields.");
+    return;
   }
+
+  // Convert array of values to comma-separated string
+  const valueString = selectedValues.join(',');
+
+  // Add single variant entry
+  variants.push({
+    type,
+    value: valueString,
+    sku,
+    discount,
+    price,
+    stock,
+    color,
+    images: [...selectedImages]
+  });
+
+  updateVariantTable();
+  clearInputs();
+}
+
+
+function updateVariantTable() {
+  const tbody = document.querySelector("#variantTable tbody");
+  tbody.innerHTML = '';
+
+  variants.forEach((v, index) => {
+    const row = `
+      <tr>
+        <td>${v.type}</td>
+        <td>${v.value}</td>
+        <td>${v.sku}</td>
+        <td>${v.discount}</td>
+        <td>${v.price}</td>
+        <td>${v.stock}</td>
+        <td><span style="background:${v.color}; display:inline-block; width:20px; height:20px; border-radius:50%;"></span></td>
+        <td>${v.images.length} image(s)</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteVariant(${index})">Delete</button></td>
+      </tr>
+    `;
+    tbody.insertAdjacentHTML('beforeend', row);
+  });
+
+  document.getElementById("variantJson").value = JSON.stringify(variants);
+}
+
+function deleteVariant(index) {
+  variants.splice(index, 1);
+  updateVariantTable();
+}
+
+function clearInputs() {
+  // Reset dropdowns
+  document.getElementById("variantType").value = '';
+
+   // Clear select2 values and options
+  const attributeSelect = document.getElementById("attributeValue");
+  $(attributeSelect).val(null).trigger('change');  // Clear selected values
+  attributeSelect.innerHTML = '';                 // Remove all <option> tags
+  $(attributeSelect).trigger('change');           // Refresh select2 UI
+
+
+  // Reset other fields
+  document.getElementById("variantSKU").value = '';
+  document.getElementById("discountPrice").value = '';
+  document.getElementById("price").value = '';
+  document.getElementById("stock").value = '';
+  document.getElementById("colorCode").value = '#000000';
+   // Reset selected images
+  selectedImages = [];
+  updateImageCount(); // update the UI count display to 0
+
+}
+
+
+
 </script>
+<script>
+let selectedImages = [];
+
+function openImagePicker() {
+  $('#imagePickerModal').modal('show');
+  fetchGalleryImages();
+}
+
+let galleryCache = [];
+
+function fetchGalleryImages() {
+  fetch('/product/product-images')
+    .then(res => res.json())
+    .then(data => {
+      galleryCache = data.data || [];
+      renderImageGallery(galleryCache);
+    });
+}
+
+function renderImageGallery(images) {
+  const gallery = document.getElementById('imageGallery');
+  gallery.innerHTML = '';
+
+  images.forEach(img => {
+    const isSelected = selectedImages.includes(img._id);
+    gallery.innerHTML += `
+      <div class="col-md-2">
+        <div class="card border ${isSelected ? 'border-primary' : ''}" onclick="toggleImageSelect('${img._id}')">
+          <img src="${img.image_path}" class="card-img-top" style="height: 100px; object-fit: cover;">
+          <div class="card-footer text-center small">${isSelected ? 'Selected' : 'Click to select'}</div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function toggleImageSelect(imageId) {
+  const idx = selectedImages.indexOf(imageId);
+  if (idx === -1) {
+    selectedImages.push(imageId);
+  } else {
+    selectedImages.splice(idx, 1);
+  }
+  renderImageGallery(galleryCache);
+  updateImageCount();
+}
+
+
+function confirmImageSelection() {
+  $('#imagePickerModal').modal('hide');
+  updateImageCount();
+}
+
+function updateImageCount() {
+  document.getElementById('selectedImageCount').innerText = selectedImages.length;
+}
+
+function uploadNewImages() {
+  const fileInput = document.getElementById('newImageUpload');
+  const files = fileInput.files;
+  const formData = new FormData();
+  for (let file of files) {
+    formData.append('images', file);
+  }
+
+  fetch('/product/upload-product-images', {
+    method: 'POST',
+    body: formData
+  }).then(() => {
+    fetchGalleryImages();
+     fileInput.value = '';
+  });
+}
+</script>
+
 <script>
   $(document).ready(function () {
   function loadCategories(industryId, selectedCategoryId = '') {

@@ -1,0 +1,846 @@
+<%- include('../layout/header') %>
+<style>
+  .image-box{
+      display: flex;
+      flex-direction: column;
+  }
+  .image_upperbox{
+    gap:8px;
+  }
+  table thead tr th {
+    color:black
+  }
+  .select2-container .select2-selection--single{
+    height:37px !important;
+  }
+  .select2-container .select2-selection--multiple{
+    min-height:38px !important;
+  }
+</style>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (product) { %>
+             <span>Edit Product</span>
+        <% } else { %>
+             <span>Create product</span>
+        <% } %>
+      <a href="/product" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/product/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (product) { %>
+            <input type="hidden" name="id" value="<%= product.id %>">
+            <% } %>
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+              <label for="industry" class="form-label">Industry <span class="mandatory">*</span></label>
+              <select name="industry_id" id="industryDropdown" class="form-control" data-required="Industry">
+                 <option value="">Select one</option>
+                <% industries.forEach(ind => { %>
+                  <option value="<%= ind._id %>"  <% if (product && String(product.industry_id) === String(ind._id)) { %> selected <% } %>><%= ind.name %></option>
+                <% }) %>
+              </select>
+            </div>
+             <div class="col-md-4 mb-2">
+              <label for="category" class="form-label">Category <span class="mandatory">*</span></label>
+              <select name="category_id" id="categoryDropdown" class="form-control" data-selected="<%= product ? product.category_id : '' %>" data-required="Category">
+                 <option value="">Select one</option>
+                
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label for="subcategory" class="form-label">SubCategory <span class="mandatory">*</span></label>
+              <!-- Subcategory Dropdown -->
+              <select name="subcategory_id" id="subcategoryDropdown" class="form-control" data-selected="<%= product ? product.subcategory_id : '' %>" data-required="SubCategory">
+                <option value="">Select one</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label for="brands_id" class="form-label">Brands </label>
+                <!-- Brand Dropdown (if needed instead) -->
+                <select name="brand_id" id="brandDropdown" class="form-control" data-selected="<%= product ? product.brand_id : '' %>">
+                  <option value="">Select one</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-2">
+              <label for="name" class="form-label">Product Name <span class="mandatory">*</span></label>
+              <input type="text" class="form-control" id="product_name" name="product_name" value="<%= product && product.name ? product.name : '' %>"  placeholder="Enter Product Name" data-required="Product Name">
+            </div>
+
+            <div class="col-md-12 mb-2">
+              <label for="email" class="form-label">Product Description <span class="mandatory">*</span></label>
+              <textarea name="description" id="description" class="form-control" data-required="Product Description"><%= product && product.description ? product.description : '' %></textarea>
+            </div>
+            
+            <!-- Product Variants -->
+              <div class="mb-4">
+                <label class="form-label">Product Variants <span class="mandatory">*</span></label>
+                
+              <div class="row g-3 align-items-end mb-4" id="variantInputRow">
+
+                <!-- Attribute Type -->
+                <div class="col-md-4">
+                  <label class="form-label">Attribute Type</label>
+                  <select class="form-select" id="variantType" onchange="fetchAttributeValues()">
+                    <option value="">-- Select Type --</option>
+                    <% attributetype.forEach(attribute => { %>
+                      <option value="<%= attribute.name %>"><%= attribute.name %></option>
+                    <% }) %>
+                  </select>
+                </div>
+
+                <!-- Attribute Values -->
+                <div class="col-md-4">
+                  <label class="form-label">Attribute Values</label>
+                  <select id="attributeValue" class="form-select" multiple="multiple"></select>
+                </div>
+
+                <!-- SKU + Auto -->
+                <div class="col-md-4">
+                  <label class="form-label">SKU</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="variantSKU" placeholder="Leave empty">
+                    <button class="btn btn-secondary" type="button" onclick="generateSKU()">Auto Generate</button>
+                  </div>
+                </div>
+
+                <!-- Discount Price -->
+                <div class="col-md-2">
+                  <label class="form-label">Discount Price</label>
+                  <input type="text" class="form-control only-number" id="discountPrice" step="0.01">
+                </div>
+
+                <!-- Price -->
+                <div class="col-md-2">
+                  <label class="form-label">Price</label>
+                  <input type="text" class="form-control only-number" id="price" step="0.01">
+                </div>
+
+                <!-- Stock -->
+                <div class="col-md-2">
+                  <label class="form-label">Stock</label>
+                  <input type="text" class="form-control only-number" id="stock">
+                </div>
+
+                <!-- Color -->
+                <div class="col-md-1">
+                  <label class="form-label">Color</label>
+                  <input type="color" class="form-control form-control-color" id="colorCode">
+                </div>
+
+                <!-- Select Images Button -->
+                <div class="col-md-2 d-flex flex-column justify-content-end">
+                  <label class="form-label">Images</label>
+                  <button type="button" class="btn btn-outline-secondary" onclick="openImagePicker()">
+                    Select Images (<span id="selectedImageCount">0</span>)
+                  </button>
+                </div>
+
+                <!-- Add Variant Button -->
+                <div class="col-md-2 d-flex flex-column justify-content-end">
+                  <label class="form-label d-none d-md-block">&nbsp;</label>
+                  <button type="button" class="btn btn-primary w-100" onclick="addVariants()">+ Add Variant(s)</button>
+                </div>
+              </div>
+
+
+
+                <!-- Display Added Variants -->
+                <div class="table-responsive mt-4">
+                  <table class="table table-bordered table-striped" id="variantTable">
+                    <thead>
+                      <tr>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                        <th>SKU</th>
+                        <th>Discount</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Color</th>
+                        <th>Images</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Variants will be appended here -->
+                       <tbody>
+                          <% if (variants && variants.length > 0) { %>
+                            <% variants.forEach(variant => { %>
+                              <tr>
+                                <td><%= variant.attribute_name %></td>
+                                <td><%= variant.attribute_value %></td>
+                                <td><%= variant.product_sku %></td>
+                                <td><%= variant.discount_price %></td>
+                                <td><%= variant.product_price %></td>
+                                <td><%= variant.product_stock %></td>
+                                <td>
+                                  <div style="width: 20px; height: 20px; background-color: <%= variant.color_code || '#000' %>;"></div>
+                                </td>
+                                <td>
+                                  <% if (variant.image_ids && variant.image_ids.length > 0) { %>
+                                    <%= variant.image_ids.length %>
+                                  <% } else { %>
+                                    N/A
+                                  <% } %>
+                                </td>
+                                <td>
+                                  <!-- Add your edit/delete buttons here -->
+                                  <button class="btn btn-danger btn-sm" onclick="removeVariant('<%= variant._id %>')">Delete</button>
+                                </td>
+                              </tr>
+                            <% }) %>
+                          <% } else { %>
+                            <tr><td colspan="9" class="text-center">No variants found</td></tr>
+                          <% } %>
+                        </tbody>
+
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Hidden input to store data -->
+                <input type="hidden" name="variant_json" id="variantJson">
+              </div>
+
+
+              <div class="mb-3">
+                <label class="form-label">Return Policy</label>
+                <select name="return_allowed" class="form-control" required>
+                  <option value="yes" <% if (product) { %> <% if (product.return_allowed === 'yes') { %> selected <% }}else{ %> selected <% } %>>Allowed (within 7 days)</option>
+                  <option value="no" <% if (product) { %> <% if (product.return_allowed === 'no') { %> selected <% }}else{ %> selected <% } %>>Not Allowed</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Return Policy Notes (Optional)</label>
+                <textarea name="return_notes" class="form-control" rows="3" placeholder="E.g., Product must be unused and in original packaging."><%= product && product.return_notes ? product.return_notes : '' %></textarea>
+              </div>
+
+              <div class="row mb-4">
+                  <div class="col-md-4">
+                      <label for="seo_title" class="form-label">SEO Title (Optional)</label>
+                       <input type="text" name="seo_title" class="form-control" value="<%= product && product.seo_title ? product.seo_title : '' %>" placeholder="SEO Title (e.g., Stylish Cotton T-Shirt for Men)">
+                  </div>
+                  <div class="col-md-4">
+                      <label for="seo_description" class="form-label">SEO Description (Optional)</label>
+                       <textarea name="seo_description" class="form-control" placeholder="Enter a brief SEO description for better Google visibility."><%= product && product.seo_description ? product.seo_description : '' %></textarea>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="product_tags" class="form-label">Product Tags / Hashtags (Optional)</label>
+                    <select name="product_tags[]" id="product_tags" class="form-control select2" multiple>
+                      <% hashtag.forEach((tag) => { %>
+                        <option value="<%= tag.id %>" 
+                          <% if (product && Array.isArray(product.product_tags) && product.product_tags.includes(tag.id)) { %> selected <% } %>>
+                          #<%= tag.name %>
+                        </option>
+                      <% }) %>
+                    </select>
+                    <small>Select one or more hashtags for better searchability.</small>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" data-required="Status">
+                        <option value="">Select status</option>
+                        <option value="active" <% if (product && product.status === 'active') { %> selected <% } %>>Active</option>
+                        <option value="inactive" <% if (product && product.status === 'inactive') { %> selected <% } %>>Inactive</option>
+                    </select>
+                  </div>
+              </div>
+        </div>
+
+        <div class="text-end">
+             <% if (product) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update product</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create product</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+<!-- Image Picker Modal -->
+<div class="modal fade" id="imagePickerModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select Product Images</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label class="form-label">Upload New Images</label>
+          <input type="file" id="newImageUpload" class="form-control" multiple accept="image/*" onchange="uploadNewImages()">
+        </div>
+
+        <div class="row g-3" id="imageGallery">
+          <!-- Image cards will appear here -->
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="confirmImageSelection()">Add Selected</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<%- include('../layout/footer') %>
+<script>
+    document.querySelectorAll('input.only-number').forEach(input => {
+  input.addEventListener('keypress', function (e) {
+    const char = String.fromCharCode(e.which);
+    if (!/[0-9]/.test(char)) {
+      e.preventDefault();
+    }
+  });
+    });
+   CKEDITOR.replace('description',{
+    versionCheck: false
+   });
+function addColorImageRow() {
+  const rowId = Date.now();
+  const html = `
+    <div class="row mb-2" id="row-${rowId}">
+      <div class="col-md-4">
+        <input type="color" name="color_name[]" class="form-control" value="#ffffff">
+      </div>
+      <div class="col-md-6">
+        <input type="file" name="product_images_${rowId}[]" class="form-control" multiple required>
+      </div>
+      <div class="col-md-2">
+        <button type="button" class="btn btn-danger btn-sm" onclick="$('#row-${rowId}').remove()">Remove</button>
+      </div>
+      <input type="hidden" name="image_group_ids[]" value="${rowId}">
+    </div>
+
+  `;
+  $('#colorImageWrapper').append(html);
+}
+  function removeColorImageRow(button) {
+    $(button).closest('.color-image-row').remove();
+  }
+
+  function removeVariant(variantId) {
+    if (confirm('Are you sure you want to delete this variant?')) {
+      fetch(`/product/variant/delete/${variantId}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status) {
+          alert('Variant deleted successfully');
+          location.reload(); // Reload the page to reflect changes
+        } else {
+          alert(data.message || 'Failed to delete variant');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Server error while deleting variant');
+      });
+    }
+  }
+</script>
+<script>
+
+  $('#attributeValue').select2({
+        placeholder: "Select or type values",
+        width: '100%',
+        allowClear: true,
+  });
+
+let variants = [];
+
+// SKU generator
+function generateSKU() {
+  document.getElementById("variantSKU").value = 'SKU-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+}
+
+// Fetch attribute values based on selected type
+function fetchAttributeValues() {
+  const type = document.getElementById("variantType").value;
+  const attributeSelect = document.getElementById("attributeValue");
+
+  // Get previously selected values
+  const previousSelections = Array.from(attributeSelect.selectedOptions).map(opt => opt.value);
+
+  // Destroy select2 if already initialized
+  if ($(attributeSelect).hasClass("select2-hidden-accessible")) {
+    $(attributeSelect).select2('destroy');
+  }
+
+  // Clear options
+  attributeSelect.innerHTML = '';
+
+  if (!type) return;
+
+  fetch(`/product/get-attribute-value?type=${type}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.status && Array.isArray(data.data)) {
+        data.data.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val.value;
+          opt.innerText = val.value;
+
+          // Pre-select if it was selected before
+          if (previousSelections.includes(val._id)) {
+            opt.selected = true;
+          }
+
+          attributeSelect.appendChild(opt);
+        });
+
+        // Re-init select2
+        $(attributeSelect).select2({
+          placeholder: "Select attribute values",
+          width: '100%'
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Failed to fetch attribute values:", err);
+    });
+}
+
+
+function addVariants() {
+  const type = document.getElementById("variantType").value;
+  const selectedValues = Array.from(document.getElementById("attributeValue").selectedOptions).map(o => o.value);
+  const sku = document.getElementById("variantSKU").value;
+  const discount = document.getElementById("discountPrice").value;
+  const price = document.getElementById("price").value;
+  const stock = document.getElementById("stock").value;
+  const color = document.getElementById("colorCode").value;
+
+  if (!type || selectedValues.length === 0 || !price || !stock) {
+    alert("Please fill all required fields.");
+    return;
+  }
+
+  // Convert array of values to comma-separated string
+  const valueString = selectedValues.join(',');
+
+  // Add single variant entry
+  variants.push({
+    type,
+    value: valueString,
+    sku,
+    discount,
+    price,
+    stock,
+    color,
+    images: [...selectedImages]
+  });
+
+  updateVariantTable();
+  clearInputs();
+}
+
+
+function updateVariantTable() {
+  const tbody = document.querySelector("#variantTable tbody");
+  tbody.innerHTML = '';
+
+  variants.forEach((v, index) => {
+    const row = `
+      <tr>
+        <td>${v.type}</td>
+        <td>${v.value}</td>
+        <td>${v.sku}</td>
+        <td>${v.discount}</td>
+        <td>${v.price}</td>
+        <td>${v.stock}</td>
+        <td><span style="background:${v.color}; display:inline-block; width:20px; height:20px; border-radius:50%;"></span></td>
+        <td>${v.images.length} image(s)</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteVariant(${index})">Delete</button></td>
+      </tr>
+    `;
+    tbody.insertAdjacentHTML('beforeend', row);
+  });
+
+  document.getElementById("variantJson").value = JSON.stringify(variants);
+}
+
+function deleteVariant(index) {
+  variants.splice(index, 1);
+  updateVariantTable();
+}
+
+function clearInputs() {
+  // Reset dropdowns
+  document.getElementById("variantType").value = '';
+
+   // Clear select2 values and options
+  const attributeSelect = document.getElementById("attributeValue");
+  $(attributeSelect).val(null).trigger('change');  // Clear selected values
+  attributeSelect.innerHTML = '';                 // Remove all <option> tags
+  $(attributeSelect).trigger('change');           // Refresh select2 UI
+
+
+  // Reset other fields
+  document.getElementById("variantSKU").value = '';
+  document.getElementById("discountPrice").value = '';
+  document.getElementById("price").value = '';
+  document.getElementById("stock").value = '';
+  document.getElementById("colorCode").value = '#000000';
+   // Reset selected images
+  selectedImages = [];
+  updateImageCount(); // update the UI count display to 0
+
+}
+
+
+
+</script>
+<script>
+let selectedImages = [];
+
+function openImagePicker() {
+  $('#imagePickerModal').modal('show');
+  fetchGalleryImages();
+}
+
+let galleryCache = [];
+
+function fetchGalleryImages() {
+  fetch('/product/product-images')
+    .then(res => res.json())
+    .then(data => {
+      galleryCache = data.data || [];
+      renderImageGallery(galleryCache);
+    });
+}
+
+function renderImageGallery(images) {
+  const gallery = document.getElementById('imageGallery');
+  gallery.innerHTML = '';
+
+  images.forEach(img => {
+    const isSelected = selectedImages.includes(img._id);
+    gallery.innerHTML += `
+      <div class="col-md-2">
+        <div class="card border ${isSelected ? 'border-primary' : ''}" onclick="toggleImageSelect('${img._id}')">
+          <img src="${img.image_path}" class="card-img-top" style="height: 100px; object-fit: cover;">
+          <div class="card-footer text-center small">${isSelected ? 'Selected' : 'Click to select'}</div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function toggleImageSelect(imageId) {
+  const idx = selectedImages.indexOf(imageId);
+  if (idx === -1) {
+    selectedImages.push(imageId);
+  } else {
+    selectedImages.splice(idx, 1);
+  }
+  renderImageGallery(galleryCache);
+  updateImageCount();
+}
+
+
+function confirmImageSelection() {
+  $('#imagePickerModal').modal('hide');
+  updateImageCount();
+}
+
+function updateImageCount() {
+  document.getElementById('selectedImageCount').innerText = selectedImages.length;
+}
+
+function uploadNewImages() {
+  const fileInput = document.getElementById('newImageUpload');
+  const files = fileInput.files;
+  const formData = new FormData();
+  for (let file of files) {
+    formData.append('images', file);
+  }
+
+  fetch('/product/upload-product-images', {
+    method: 'POST',
+    body: formData
+  }).then(() => {
+    fetchGalleryImages();
+     fileInput.value = '';
+  });
+}
+</script>
+
+<script>
+  $(document).ready(function () {
+  function loadCategories(industryId, selectedCategoryId = '') {
+    const actionUrl = '/filter-category-get';
+
+    $('#categoryDropdown').html('<option value="">Select one</option>');
+
+    if (!industryId) return;
+
+    $.ajax({
+      url: actionUrl,
+      method: 'GET',
+      data: { industry_id: industryId },
+      success: function (response) {
+        if (response.data.length > 0) {
+          response.data.forEach(cat => {
+            const selected = (cat._id === selectedCategoryId) ? 'selected' : '';
+            $('#categoryDropdown').append(`<option value="${cat._id}" ${selected}>${cat.name}</option>`);
+          });
+        }
+      },
+      error: function () {
+        alert('Failed to load categories.');
+      }
+    });
+  }
+
+  // When industry dropdown changes
+  $('#industryDropdown').on('change', function () {
+    const industryId = $(this).val();
+    loadCategories(industryId);
+  });
+
+  // --- EDIT MODE SUPPORT ---
+  // Trigger change if pre-selected industry value exists
+  const preSelectedIndustry = $('#industryDropdown').val();
+  const preSelectedCategory = $('#categoryDropdown').data('selected'); // Set this in HTML if available
+
+  if (preSelectedIndustry) {
+    loadCategories(preSelectedIndustry, preSelectedCategory);
+  }
+
+
+  // Load Subcategories or Brands by Category
+    function loadSubcategoriesOrBrands(categoryId, selectedId = '', type = 'subcategory') {
+      const url = type === 'subcategory' ? '/filter-subcategory-get' : '/filter-brand-get';
+      const targetDropdown = type === 'subcategory' ? '#subcategoryDropdown' : '#brandDropdown';
+
+      $(targetDropdown).html('<option value="">Select one</option>');
+      if (!categoryId) return;
+
+      $.ajax({
+        url: url,
+        method: 'GET',
+        data: { category_id: categoryId },
+        success: function (response) {
+          if (response.data && response.data.length > 0) {
+            response.data.forEach(item => {
+              const selected = (item._id === selectedId) ? 'selected' : '';
+              $(targetDropdown).append(`<option value="${item._id}" ${selected}>${item.name}</option>`);
+            });
+          }
+        },
+        error: function () {
+          alert(`Failed to load ${type}s.`);
+        }
+      });
+    }
+
+
+    // Category change triggers subcategory or brand loading
+    $('#categoryDropdown').on('change', function () {
+      const categoryId = $(this).val();
+      loadSubcategoriesOrBrands(categoryId, '', 'subcategory'); // change to 'brand' if needed
+      loadSubcategoriesOrBrands(categoryId, '', 'brand'); // change to 'brand' if needed
+    });
+
+    // --- Edit Mode Trigger on Page Load ---
+    const preCategory = $('#categoryDropdown').data('selected');
+    const preSubcategory = $('#subcategoryDropdown').data('selected');
+    const preBrand = $('#brandDropdown').data('selected');
+    // const preBrand = $('#brandDropdown').data('selected'); // if using brand
+
+   
+
+    if (preCategory) {
+      loadSubcategoriesOrBrands(preCategory, preSubcategory, 'subcategory'); // or 'brand'
+      loadSubcategoriesOrBrands(preCategory, preBrand, 'brand'); // or 'brand'
+    }
+});
+$(document).ready(function () {
+  $('input[name="image_type"]').on('change', function () {
+    if ($(this).val() === 'color') {
+      $('#colorImageWrapper').show();
+      $('#generalImageWrapper').hide();
+    } else {
+      $('#colorImageWrapper').hide();
+      $('#generalImageWrapper').show();
+    }
+  });
+
+  // Trigger on page load (edit case)
+  $('input[name="image_type"]:checked').trigger('change');
+});
+ $(document).ready(function () {
+    $('input[name="has_variants"]').on('change', function () {
+      if ($(this).val() === 'yes') {
+        $('#variantSection').show();
+      } else {
+        $('#variantSection').hide();
+      }
+    });
+
+    // Optional: Trigger change for edit page
+    $('input[name="has_variants"]:checked').trigger('change');
+  });
+
+
+$(document).ready(function () {
+  // Open file picker on box click
+  $('#generalImageDropArea').on('click', function () {
+    $('#generalImages').trigger('click');
+  });
+
+  // Handle file preview
+  $('#generalImages').on('change', function (e) {
+    let files = e.target.files;
+    $('#generalImagePreview').empty();
+
+    Array.from(files).forEach((file, index) => {
+      let reader = new FileReader();
+      reader.onload = function (event) {
+        let img = `<div class="image-box">
+                    <img src="${event.target.result}" alt="Preview">
+                    <button type="button" class="remove-btn" onclick="$(this).parent().remove()">×</button>
+                  </div>`;
+        $('#generalImagePreview').append(img);
+      }
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Drag and drop support
+  const dropArea = $('#generalImageDropArea');
+
+  dropArea.on('dragover', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.css('background-color', '#f1f1f1');
+  });
+
+  dropArea.on('dragleave', function () {
+    dropArea.css('background-color', '');
+  });
+
+  dropArea.on('drop', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.css('background-color', '');
+    $('#generalImages')[0].files = e.originalEvent.dataTransfer.files;
+    $('#generalImages').trigger('change');
+  });
+});
+
+
+
+</script>
+<script>
+$(document).ready(function () {
+  function toggleImageSections() {
+  const selected = $('input[name="image_type"]:checked').val();
+
+  if (selected === 'color') {
+    $('.color-upload').removeClass('d-none');
+    $('.general-upload').addClass('d-none');
+  } else {
+    $('.general-upload').removeClass('d-none');
+    $('.color-upload').addClass('d-none');
+  }
+}
+// Only call once
+toggleImageSections();
+
+// Then bind
+$('input[name="image_type"]').on('change', toggleImageSections);
+
+});
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const variantYes = document.getElementById("variantYes");
+    const variantNo = document.getElementById("variantNo");
+    const variantSection = document.getElementById("variantSection");
+    const singleFields = document.getElementById("singleProductFields");
+
+    function toggleVariantSections() {
+      if (variantYes.checked) {
+        variantSection.classList.remove("d-none");
+        singleFields.classList.add("d-none");
+      } else {
+        variantSection.classList.add("d-none");
+        singleFields.classList.remove("d-none");
+      }
+    }
+
+    // Initial check
+    toggleVariantSections();
+
+    // Add event listeners
+    variantYes.addEventListener("change", toggleVariantSections);
+    variantNo.addEventListener("change", toggleVariantSections);
+  });
+</script>
+<script>
+  document.querySelectorAll('.delete-image-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!confirm("Are you sure you want to delete this image?")) return;
+
+      const productId = btn.getAttribute('data-product-id');
+      const colorIndex = btn.getAttribute('data-color-index');
+      const imageIndex = btn.getAttribute('data-image-index');
+      const image = btn.getAttribute('data-image');
+
+      fetch('/product/image/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId,
+          colorIndex,
+          imageIndex,
+          image
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          btn.closest('.image-box').remove();
+          alert('Image deleted successfully');
+        } else {
+          alert('Failed to delete image');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error deleting image');
+      });
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $('#product_tags').select2({
+      placeholder: "Select hashtags",
+      tags: true,
+      tokenSeparators: [',']
+    });
+  });
+</script>
+
+
+
+
+

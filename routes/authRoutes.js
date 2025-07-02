@@ -27,6 +27,8 @@ const countryController = require('../controllers/CountriesController');
 const HashtagController = require('../controllers/HashtagController');
 const BannerController = require('../controllers/BannerController');
 const CouponController = require('../controllers/CouponController');
+const AttributeTypeController = require('../controllers/AttributeTypeController');
+const AttributeValueController = require('../controllers/AttributeValueController');
 
 
 //for csv import
@@ -132,8 +134,14 @@ router.post('/product/store', authMiddleware, productUpload.any(), productContro
 router.get('/product/view/:id',authMiddleware, productController.View);
 router.get('/product/edit/:id',authMiddleware, productController.Edit);
 router.get('/product/delete/:id',authMiddleware, productController.Delete);
-router.post('/product/image/delete/',authMiddleware,upload.none(), productController.ProductImageDelete);
+router.post('/product/image/delete/:id',authMiddleware,upload.none(), productController.ProductImageDelete);
 router.get('/product/bulk-import/',authMiddleware, productController.ProductBulkImport);
+router.get('/product/get-attribute-value/',authMiddleware, productController.GetattributeValue);
+router.get('/product/product-images/',authMiddleware, productController.GetProductImages);
+router.post('/product/upload-product-images/',authMiddleware,productUpload.array('images'), productController.UploadProductImages);
+router.delete('/product/variant/delete/:id', productController.DeleteVariant);
+// product images curd 
+router.get('/product-images', authMiddleware, productController.ProductImagesList);
 
 
 const manufactureUploadPath = 'uploads/manufacture/';
@@ -241,6 +249,22 @@ router.get('/coupon/edit/:id',authMiddleware, CouponController.Edit);
 router.get('/coupon/delete/:id',authMiddleware, CouponController.Delete);
 router.get('/coupon/get-applicables/:type',authMiddleware, CouponController.GetApplicables);
 router.get('/coupon/view/:id',authMiddleware, CouponController.View);
+
+// Attribute type pages 
+router.get('/attribute-type',authMiddleware, AttributeTypeController.List);
+router.get('/attribute-type/create',authMiddleware, AttributeTypeController.Create);
+router.post('/attribute-type/store',authMiddleware, upload.none(),AttributeTypeController.Store);
+router.get('/attribute-type/edit/:id',authMiddleware, AttributeTypeController.Edit);
+router.get('/attribute-type/delete/:id',authMiddleware, AttributeTypeController.Delete);
+
+// Attribute value pages 
+router.get('/attribute-value',authMiddleware, AttributeValueController.List);
+router.get('/attribute-value/create',authMiddleware, AttributeValueController.Create);
+router.post('/attribute-value/store',authMiddleware, upload.none(),AttributeValueController.Store);
+router.get('/attribute-value/edit/:id',authMiddleware, AttributeValueController.Edit);
+router.get('/attribute-value/delete/:id',authMiddleware, AttributeValueController.Delete);
+
+
 
 router.get('/logout', (req, res) => {
   res.clearCookie('access_token');

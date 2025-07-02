@@ -99,6 +99,10 @@ $(document).ready(function () {
           });
           form.reset();
           $('.is-invalid').removeClass('is-invalid');
+
+          setInterval(() => {
+            window.location.href = response.redirect_url || '/';
+          }, 2000);
         } else {
           const errors = response.errors;
           for (const field in errors) {

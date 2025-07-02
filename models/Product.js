@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const VariantSchema = require('./Variant');
-const ColorImageSchema = require('./ColorImage');
 
 const ProductSchema = new mongoose.Schema({
   industry_id: {
@@ -23,22 +22,6 @@ const ProductSchema = new mongoose.Schema({
   },
   name: { type: String, required: true },
   description: { type: String },
-
-  image_type: {
-    type: String,
-    enum: ['color', 'general'],
-    default: 'color'
-  },
-
-  has_variants: {
-    type: String,
-    default: 'no'
-  },
-
-  // If image_type === 'color'
-  color_images: [ColorImageSchema],
-
-  variants: [VariantSchema],
 
   return_allowed: {
     type: String,

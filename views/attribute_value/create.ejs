@@ -1,0 +1,66 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (attribute_value) { %>
+             <span>Edit Attribute Value</span>
+        <% } else { %>
+             <span>Create Attribute Value</span>
+        <% } %>
+      <a href="/attribute-value" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/attribute-value/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (attribute_value) { %>
+            <input type="hidden" name="id" value="<%= attribute_value.id %>">
+            <% } %>
+        <div class="row mb-3">
+
+          <div class="col-md-12 mb-2">
+              <label for="Attribute Type" class="form-label">Attribute Type <span class="mandatory">*</span></label>
+                <select name="type_id" id="type_id" class="form-control">
+                  <option value="">Select one</option>
+                  <% attribute_type_list.forEach((attribute_type) => { %>
+                      <option value="<%= attribute_type.id %>" 
+                        <% if (attribute_value && attribute_value.type_id && attribute_value.type_id.id === attribute_type.id) { %> selected <% } %>>
+                        <%= attribute_type.name %>
+                      </option>
+                  <% }) %>
+                </select>
+            </div>
+            <div class="mb-3">
+              <label>Value <span class="mandatory">*</span></label>
+                <input type="text" class="form-control" id="value" name="value" value="<%= attribute_value && attribute_value.value ? attribute_value.value : '' %>" placeholder="Enter Attribute Value Name" data-required="Value">
+            </div>
+            
+            <!-- <div class="col-md-12 mb-2">
+              <label for="Status" class="form-label">Status <span class="mandatory">*</span></label>
+                <select name="status" id="status" class="form-control">
+                  <option value="active" <%= attribute_value && attribute_value.status === 'active' ? 'selected' : '' %>>Active</option>
+                  <option value="inactive" <%= attribute_value && attribute_value.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                </select>
+            </div> -->
+        </div>
+
+        <div class="text-end">
+             <% if (attribute_value) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Attribute Type</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Attribute Type</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<%- include('../layout/footer') %>
+<script>
+  CKEDITOR.replace('content',{
+    versionCheck: false
+  });
+</script>

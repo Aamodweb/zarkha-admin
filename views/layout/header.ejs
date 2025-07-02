@@ -65,7 +65,7 @@
   </li>
 
   <!-- Common Setting Dropdown -->
-  <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') || currentRoute.startsWith('/hashtag') || currentRoute.startsWith('/banner') ? 'active' : '' || currentRoute.startsWith('/coupon') ? 'active' : '' %>">
+  <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') || currentRoute.startsWith('/hashtag') || currentRoute.startsWith('/banner') ? 'active' : '' || currentRoute.startsWith('/coupon') ? 'active' : '' || currentRoute.startsWith('/attribute-type') ? 'active' : '' || currentRoute.startsWith('/attribute-value') ? 'active' : '' %>">
     <a href="javascript:void(0)"><span> <i class="fas fa-cogs"></i>&nbsp;Global Setting</span>  <i class="fas fa-chevron-down submenu-toggle-icon"></i></a>
     <ul class="submenu">
       <li class="<%= currentRoute.startsWith('/banner') ? 'active' : '' %>">
@@ -82,6 +82,12 @@
       </li>
       <li class="<%= currentRoute.startsWith('/brands') ? 'active' : '' %>">
         <a href="/brands"><i class="fas fa-tags"></i>  Brands</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/attribute-type') ? 'active' : '' %>">
+        <a href="/attribute-type"><i class="fas fa-tags"></i>  Attribute Type</a>
+      </li>
+      <li class="<%= currentRoute.startsWith('/attribute-value') ? 'active' : '' %>">
+        <a href="/attribute-value"><i class="fas fa-tags"></i>  Attribute Value</a>
       </li>
       <li class="<%= currentRoute.startsWith('/subcategory') ? 'active' : '' %>">
         <a href="/subcategory"><i class="fas fa-list-alt"></i> SubCategory</a>
