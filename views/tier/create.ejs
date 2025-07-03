@@ -1,0 +1,62 @@
+<%- include('../layout/header') %>
+<div class="content">
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header d-flex justify-content-between align-items-center bg-warning text-dark fw-bold">
+        <% if (tier) { %>
+             <span>Edit Tier</span>
+        <% } else { %>
+             <span>Create Tier</span>
+        <% } %>
+      <a href="/tier" class="btn btn-sm btn-dark">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+      <form action="/tier/store" id="adminUserForm" method="POST" enctype='multipart/form-data'>
+          <% if (tier) { %>
+            <input type="hidden" name="id" value="<%= tier.id %>">
+            <% } %>
+        <div class="row mb-3">
+           
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= tier && tier.name ? tier.name : '' %>"  placeholder="Enter Tier Name" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="image" class="form-label">Image</label>
+            <input type="file" class="form-control" id="image" name="image" value="">
+
+            <% if (tier && tier.image) { %>
+              <img src="<%= BASE_URL%>/uploads/tier/<%= tier.image %>" alt="Tier Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+            <% }%>
+          </div>
+
+          <div class="col-md-12">
+            <label for="email" class="form-label">Description</label>
+            <textarea name="description" id="description" class="form-control"><%= tier && tier.description ? tier.description : '' %></textarea>
+          </div>
+            
+        </div>
+        
+
+        <div class="text-end">
+             <% if (tier) { %>
+                <button type="submit" class="btn btn-primary w-auto">Update Tier</button>
+             <% }else{ %>
+                 <button type="submit" class="btn btn-primary w-auto">Create Tier</button>
+                <% } %>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<%- include('../layout/footer') %>
+<script>
+  CKEDITOR.replace('content',{
+    versionCheck: false
+  });
+</script>

@@ -29,6 +29,7 @@ const BannerController = require('../controllers/BannerController');
 const CouponController = require('../controllers/CouponController');
 const AttributeTypeController = require('../controllers/AttributeTypeController');
 const AttributeValueController = require('../controllers/AttributeValueController');
+const TierController = require('../controllers/TierController');
 
 
 //for csv import
@@ -265,6 +266,19 @@ router.get('/attribute-value/create',authMiddleware, AttributeValueController.Cr
 router.post('/attribute-value/store',authMiddleware, upload.none(),AttributeValueController.Store);
 router.get('/attribute-value/edit/:id',authMiddleware, AttributeValueController.Edit);
 router.get('/attribute-value/delete/:id',authMiddleware, AttributeValueController.Delete);
+
+
+const tierUploadPath = 'uploads/tier/';
+const tierStorage = setupStorage(tierUploadPath);
+const tierUpload = multer({ storage: tierStorage });
+
+//tier or levels module
+router.get('/tier',authMiddleware, TierController.List);
+router.get('/tier/create',authMiddleware, TierController.Create);
+router.post('/tier/store',authMiddleware, tierUpload.array('image'),TierController.Store);
+router.get('/tier/edit/:id',authMiddleware, TierController.Edit);
+router.get('/tier/delete/:id',authMiddleware, TierController.Delete);
+
 
 
 

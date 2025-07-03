@@ -112,7 +112,8 @@
   currentRoute.startsWith('/city') ||
   currentRoute.startsWith('/hashtag') ||
   currentRoute.startsWith('/banner') ||
-  currentRoute.startsWith('/coupon')
+  currentRoute.startsWith('/coupon') ||
+  currentRoute.startsWith('/tier')
 ) ? 'active' : '' %>">
   <a href="javascript:void(0)">
     <span><i class="fas fa-cogs"></i>&nbsp;Global Setting</span>
@@ -134,9 +135,11 @@
     <li class="<%= currentRoute.startsWith('/hashtag') ? 'active' : '' %>">
       <a href="/hashtag"><i class="fas fa-hashtag"></i> HashTag</a>
     </li>
+    <li class="<%= currentRoute.startsWith('/tier') ? 'active' : '' %>">
+      <a href="/tier"><i class="fas fa-hashtag"></i> Tier</a>
+    </li>
   </ul>
 </li>
-
 </ul>
 
 </div>

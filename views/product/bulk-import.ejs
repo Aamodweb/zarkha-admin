@@ -112,10 +112,10 @@
         <div class="mb-4">
           <h5>Download Reference CSV Files</h5>
           <div class="d-flex flex-wrap gap-2">
-            <a href="<%= BASE_URL %>/export/industry-csv" class="btn btn-outline-primary btn-sm">Industry CSV</a>
-            <a href="<%= BASE_URL %>/export/category-csv" class="btn btn-outline-primary btn-sm">Category CSV</a>
-            <a href="<%= BASE_URL %>/export/subcategory-csv" class="btn btn-outline-primary btn-sm">Subcategory CSV</a>
-            <a href="<%= BASE_URL %>/export/brand-csv" class="btn btn-outline-primary btn-sm">Brand CSV</a>
+            <a href="<%= BASE_URL %>/industry/export" class="btn btn-outline-primary btn-sm">Industry CSV</a>
+            <a href="<%= BASE_URL %>/category/export" class="btn btn-outline-primary btn-sm">Category CSV</a>
+            <a href="<%= BASE_URL %>/subcategory/export" class="btn btn-outline-primary btn-sm">Subcategory CSV</a>
+            <a href="<%= BASE_URL %>/brands/export" class="btn btn-outline-primary btn-sm">Brand CSV</a>
             <a href="<%= BASE_URL %>/product-images/export" class="btn btn-outline-primary btn-sm">ProductImages CSV</a>
           </div>
         </div>
@@ -172,11 +172,12 @@
   </ul>
 </div>
         <!-- Upload Form -->
-        <form action="<%= BASE_URL %>/product/import" method="POST" enctype="multipart/form-data">
+        <form action="<%= BASE_URL %>/product/import" method="POST" id="importCSVForm" enctype="multipart/form-data">
           <div class="mb-3">
             <label for="csv_file" class="form-label">Upload Product CSV</label>
-            <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv" required>
+            <input type="file" name="csvFile" id="csvFile" class="form-control" accept=".csv" required>
           </div>
+          <div id="importResult" class="text-success small mt-2"></div>
           <button type="submit" class="btn btn-primary">Import Products</button>
         </form>
       </div>
@@ -184,3 +185,42 @@
 
 
 <%- include('../layout/footer') %>
+<script>
+  $('#importCSVForm').on('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    $.ajax({
+      url: '/product/import',
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+      beforeSend: () => {
+        $('#importResult').removeClass('text-danger').text('Uploading...');
+      },
+      success: function (res) {
+         let resultHtml = `<div class="fw-bold text-success">${res.message}</div>`;
+
+        if (res.skipped && res.skipped.length > 0) {
+          resultHtml += `<div class="mt-2 text-warning"><strong>Skipped:</strong><ul>`;
+          res.skipped.forEach(item => {
+            resultHtml += `<li><b>${item.name || '[Unnamed]'}</b>: ${item.reason}</li>`;
+          });
+          resultHtml += `</ul></div>`;
+        }
+
+        $('#importResult').html(resultHtml);
+
+        // setTimeout(() => {
+        //   $('#importCSVModal').modal('hide');
+        //   location.reload();
+        // }, 1000);
+      },
+      error: function (err) {
+        $('#importResult').addClass('text-danger').text('Failed to import CSV.');
+      }
+    });
+  });
+</script>
+

@@ -356,8 +356,149 @@ const ProductBulkImport = async(req, res) => {
 }
 
 const ProductBulkImportData = async (req, res) => {
- 
-}
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const filePath = req.file.path;
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    fs.unlinkSync(filePath); // Remove uploaded file after parsing
+
+    const inserted = [];
+    const skipped = [];
+
+    for (const row of rows) {
+      try {
+        const {
+          industry_id,
+          category_id,
+          subcategory_id,
+          brand_id,
+          product_name,
+          description,
+          variant_json,
+          return_allowed,
+          return_notes,
+          seo_title,
+          seo_description,
+          product_tags,
+          status
+        } = row;
+
+        console.log("row", row);
+      
+
+        // ----------- VALIDATION ------------
+        if (!industry_id || !category_id || !subcategory_id || !product_name?.trim() || !description || !status) {
+          skipped.push({ product_name, reason: 'Missing required fields' });
+          continue;
+        }
+
+        const slug = product_name.trim().toLowerCase().replace(/\s+/g, '-');
+
+        const existingProduct = await Product.findOne({ slug });
+        if (existingProduct) {
+          skipped.push({ product_name, reason: 'Product already exists' });
+          continue;
+        }
+
+
+       let tagIds = [];
+
+        if (row.product_tags && typeof row.product_tags === 'string') {
+          const tagNames = row.product_tags
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean);
+
+          const foundTags = await Hashtag.find({
+            name: { $in: tagNames },
+            status: 'active' // or true if your schema uses boolean
+          }).select('_id name');
+
+          tagIds = foundTags.map(tag => tag._id);
+
+          // Optional: log missing tags for review
+          const foundNames = foundTags.map(t => t.name);
+          const missingTags = tagNames.filter(t => !foundNames.includes(t));
+          if (missingTags.length > 0) {
+            console.warn(`Missing tags for product "${row.product_name}":`, missingTags);
+          }
+        }
+
+
+
+        // Prepare product data
+       const productData = {
+                              industry_id: row.industry_id,
+                              category_id: row.category_id,
+                              subcategory_id: row.subcategory_id,
+                              brand_id: row.brand_id,
+                              name: row.product_name,
+                              slug: row.product_name.trim().toLowerCase().replace(/\s+/g, '-'),
+                              description: row.description,
+                              return_allowed: row.return_allowed,
+                              return_notes: row.return_notes,
+                              seo_title: row.seo_title,
+                              seo_description: row.seo_description,
+                              product_tags: tagIds, // ✅ converted to IDs
+                              status: row.status,
+                              created_at: new Date(),
+                              updated_at: new Date()
+                            };
+
+
+        console.log("productData",productData);
+
+        const newProduct = new Product(productData);
+        const savedProduct = await newProduct.save();
+
+        // ----------- VARIANTS SAVE ------------
+        let variantsToSave = [];
+
+        if (variant_json) {
+          const parsedVariants = JSON.parse(variant_json);
+          for (const v of parsedVariants) {
+            variantsToSave.push({
+              product_id: savedProduct._id,
+              attribute_name: v.type,
+              attribute_value: v.value,
+              product_sku: v.sku || '',
+              product_price: parseFloat(v.price || 0),
+              discount_price: parseFloat(v.discount || 0),
+              product_stock: parseInt(v.stock || 0),
+              color_code: v.color || '',
+              image_ids: Array.isArray(v.images) ? v.images : [],
+            });
+          }
+
+          if (variantsToSave.length > 0) {
+            await Variant.insertMany(variantsToSave);
+          }
+        }
+
+        inserted.push(product_name);
+
+      } catch (err) {
+        console.error('Row skipped due to error:', err.message);
+        skipped.push({ name: row.product_name || 'Unknown', reason: err.message });
+      }
+    }
+
+    return res.json({
+      message: `Import completed: ${inserted.length} inserted, ${skipped.length} skipped`,
+      inserted,
+      skipped
+    });
+
+  } catch (err) {
+    console.error('Import error:', err);
+    return res.status(500).json({ error: 'Import failed', details: err.message });
+  }
+};
+
 
 const GetattributeValue = async (req, res) => {
   try {
