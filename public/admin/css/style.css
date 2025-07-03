@@ -43,38 +43,6 @@
   min-height: 0;
 }
 
-    .sidebar {
-      width: 250px;
-      background: var(--secondary);
-      color: #000;
-      padding: 20px 15px;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar.closed {
-      width: 70px;
-    }
-    .to-purple-600 {
-    --tw-gradient-to: #9333ea var(--tw-gradient-to-position);
-}
-
-    .sidebar .logo {
-      text-align: center;
-      /* margin-bottom: 30px; */
-    }
-
-    .sidebar .logo img {
-        background: white;
-        padding: 10px;
-        border-radius: 10px;
-        width: 100%;
-    }
-
-
-    .sidebar.closed .logo img {
-      width: 40px;
-    }
-
     .logo {
   padding: 12px 16px;
 }
@@ -113,129 +81,10 @@
 .logo span {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937; /* Tailwind's gray-800 */
+  color: #fff; /* Tailwind's gray-800 */
   margin-left: 0.75rem;
 }
 
-
-    .sidebar ul {
-      list-style: none;
-      padding-left: 0 !important;
-    }
-
-    .sidebar ul li {
-      margin-bottom: 10px;
-    }
-
-    .sidebar ul li a {
-      color: #45454c;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      border-radius: 6px;
-      transition: 0.3s;
-      font-size:15px;
-    }
-
-    .sidebar ul li a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar ul li a i {
-      width: 17px;
-      font-size: 15px;
-    }
-
-    .sidebar ul li a span {
-      margin-left: 10px;
-      white-space: nowrap;
-    }
-
-    .sidebar.closed ul li a span {
-      display: none;
-    }
-
-.sidebar .menu li.active {
-    background: #dbeafe; /* your yellow color */
-    color: #1d4ed8;
-    /* font-weight: 500; */
-    border-left: 4px solid #1d4ed8;
-}
-
-
-    .sidebar .menu li.active i {
-    color: #1d4ed8;
-    }
-    .sidebar .menu li.active a {
-    color: #1d4ed8;
-    }
-
-    .sidebar .menu li:not(.active):hover {
-    background: #dbeafe; /* subtle hover */
-    color: #1d4ed8;
-    }
-
-    .sidebar .menu li {
-    transition: background 0.3s ease, color 0.3s ease;
-    }
-
-  .menu .has-sub > a {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-    /* Submenu container */
-.sidebar .menu .submenu {
-  padding-left: 20px;
-  background-color: #f1f5f9; /* lighter background for submenu */
-  display: none; /* default hidden */
-}
-
-/* Show submenu when parent has "active" */
-.sidebar .menu li.active > .submenu {
-  display: block;
-}
-
-/* Submenu list items */
-.sidebar .menu .submenu li {
-  padding: 8px 15px;
-  font-size: 14px;
-  background: none !important;
-  color: #1e293b;
-  border-left: 3px solid transparent;
-  transition: all 0.3s ease;
-}
-
-/* Submenu item active */
-.sidebar .menu .submenu li.active {
-  background-color: #dbeafe;
-  color: #1d4ed8;
-}
-
-/* Submenu item hover */
-.sidebar .menu .submenu li:hover {
-  background-color: #e0f2fe;
-  color: #1d4ed8;
-  border-left-color: #93c5fd;
-}
-
-/* Submenu icons (optional if any) */
-.sidebar .menu .submenu li i {
-  margin-right: 8px;
-  color: inherit;
-}
-
-.sidebar .menu .submenu li a{
-  background: none; 
-  color: #45454c;
-}
-.sidebar .menu .submenu li.active a{
-   color: #1d4ed8;
-}
-
-    
 
     .main {
       flex: 1;

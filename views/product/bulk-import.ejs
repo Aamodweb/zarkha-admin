@@ -116,6 +116,7 @@
             <a href="<%= BASE_URL %>/export/category-csv" class="btn btn-outline-primary btn-sm">Category CSV</a>
             <a href="<%= BASE_URL %>/export/subcategory-csv" class="btn btn-outline-primary btn-sm">Subcategory CSV</a>
             <a href="<%= BASE_URL %>/export/brand-csv" class="btn btn-outline-primary btn-sm">Brand CSV</a>
+            <a href="<%= BASE_URL %>/product-images/export" class="btn btn-outline-primary btn-sm">ProductImages CSV</a>
           </div>
         </div>
 
@@ -170,11 +171,8 @@
     <li>This format supports bulk uploads with multiple variants per product in a single CSV row.</li>
   </ul>
 </div>
-
-
-
         <!-- Upload Form -->
-        <form action="/product/import" method="POST" enctype="multipart/form-data">
+        <form action="<%= BASE_URL %>/product/import" method="POST" enctype="multipart/form-data">
           <div class="mb-3">
             <label for="csv_file" class="form-label">Upload Product CSV</label>
             <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv" required>

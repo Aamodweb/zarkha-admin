@@ -136,12 +136,14 @@ router.get('/product/edit/:id',authMiddleware, productController.Edit);
 router.get('/product/delete/:id',authMiddleware, productController.Delete);
 router.post('/product/image/delete/:id',authMiddleware,upload.none(), productController.ProductImageDelete);
 router.get('/product/bulk-import/',authMiddleware, productController.ProductBulkImport);
+router.post('/product/import/',authMiddleware,csvUpload.single('csvFile'),productController.ProductBulkImportData);
 router.get('/product/get-attribute-value/',authMiddleware, productController.GetattributeValue);
 router.get('/product/product-images/',authMiddleware, productController.GetProductImages);
 router.post('/product/upload-product-images/',authMiddleware,productUpload.array('images'), productController.UploadProductImages);
 router.delete('/product/variant/delete/:id', productController.DeleteVariant);
 // product images curd 
 router.get('/product-images', authMiddleware, productController.ProductImagesList);
+router.get('/product-images/export', authMiddleware, productController.ProductImagesExport);
 
 
 const manufactureUploadPath = 'uploads/manufacture/';

@@ -13,6 +13,8 @@ const AttributeValue = require('../models/AttributeValue');
 const AttributeType = require('../models/AttributeType');
 const path = require('path');
 const fs = require('fs');
+const XLSX = require('xlsx');
+
 
 const List = async (req, res) => {
   try {
@@ -353,6 +355,10 @@ const ProductBulkImport = async(req, res) => {
        res.render('product/bulk-import', {message: "" });
 }
 
+const ProductBulkImportData = async (req, res) => {
+ 
+}
+
 const GetattributeValue = async (req, res) => {
   try {
     const { type } = req.query;
@@ -449,6 +455,41 @@ const ProductImagesList = async (req, res) => {
   }
 };
 
+const ProductImagesExport = async (req, res) => {
+      try {
+          const product_images = await ProductImage.find();
+      
+          if (!product_images || product_images.length === 0) {
+            return res.status(404).send('No Product images found to export.');
+          }
+      
+          // Prepare export data
+            const exportData = product_images.map((productimg, index) => ({
+              SNo: index + 1,
+              ImageId: productimg.id || 'N/A',
+              path: productimg.image_path || 'N/A'
+            }));
+      
+      
+          // Convert to worksheet
+          const worksheet = XLSX.utils.json_to_sheet(exportData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, 'ProductImages');
+      
+          // Write to buffer
+          const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      
+          // Send response
+          res.setHeader('Content-Disposition', 'attachment; filename="productimages_export.xlsx"');
+          res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          return res.send(buffer);
+      
+        } catch (error) {
+          console.error('Product Images export error:', error);
+          return res.status(500).send('Failed to export Product Images.');
+        }
+};
+
 const DeleteVariant = async (req, res) => {
   try {
     const variantId = req.params.id;
@@ -467,4 +508,4 @@ const DeleteVariant = async (req, res) => {
   } 
 }
 
-module.exports = {List,Create,Store,Edit,View,Delete,ProductImageDelete,ProductBulkImport,GetattributeValue,GetProductImages,UploadProductImages,ProductImagesList,DeleteVariant};
+module.exports = {List,Create,Store,Edit,View,Delete,ProductImageDelete,ProductBulkImport,GetattributeValue,GetProductImages,UploadProductImages,ProductImagesList,DeleteVariant,ProductImagesExport,ProductBulkImportData};

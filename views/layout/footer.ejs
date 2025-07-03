@@ -8,29 +8,22 @@
 <script src="<%= ASSET_URL %>/js/snackbar.js"  type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
-$(document).on('click', '.has-sub > a', function (e) {
-  e.preventDefault();
-  const $parent = $(this).parent();
-
-  // const isRouteActive = $parent.find('li.active').length > 0;
-
-  // Only toggle 'active' class if no subitem is already active
-  // $parent.toggleClass('active');
-  // if (!isRouteActive) {
-  // }
-
-  // Always toggle the submenu display (show/hide)
-  $parent.find('.submenu').first().slideToggle(200);
-});
-
-// Show submenu by default if active
 $(document).ready(function () {
-  $('.has-sub.active .submenu').show();
-});
+  // Toggle submenus
+  $('.has-sub > a').on('click', function (e) {
+      e.preventDefault();
+      const parentLi = $(this).parent();
+      const submenu = parentLi.find('.submenu').first();
 
+      // Toggle active class and show submenu
+      parentLi.toggleClass('active');
+      submenu.slideToggle(200);
+    });
+
+    // Initialize visible submenu on load
+    $('.has-sub.active .submenu').show();
+  });
 </script>
-
-
   <script>
  function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");

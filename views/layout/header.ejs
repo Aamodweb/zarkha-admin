@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="<%= ASSET_URL %>/image/favicon.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/style.css">
+   <link rel="stylesheet" href="<%= ASSET_URL %>/css/sidebar.css">
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/responsive.css">
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/admintable.css">
    <link rel="stylesheet" href="<%= ASSET_URL %>/css/snackbar.css">
@@ -39,7 +40,7 @@
         </div>
       </div>
   <div class="mobile-close-btn" onclick="toggleSidebar()">✕</div>
-  <hr>
+  <!-- <hr> -->
 <ul class="menu">
   <li class="<%= currentRoute === '/dashboard' ? 'active' : '' %>">
     <a href="/dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
@@ -51,10 +52,53 @@
 
   <!-- Product Management Section -->
   <!-- <li class="menu-label">Product Management</li> -->
+<!-- Common Setting Dropdown -->
+  <li class="has-sub <%= (
+  currentRoute.startsWith('/product') ||
+  currentRoute.startsWith('/product/create') ||
+  currentRoute.startsWith('/units') ||
+  currentRoute.startsWith('/brands') ||
+  currentRoute.startsWith('/subcategory') ||
+  currentRoute.startsWith('/category') ||
+  currentRoute.startsWith('/industry') ||
+  currentRoute.startsWith('/attribute-type') ||
+  currentRoute.startsWith('/attribute-value')
+) ? 'active' : '' %>">
+  <a href="javascript:void(0)">
+    <span><i class="fas fa-box"></i>&nbsp;Product Management</span>
+    <i class="fas fa-chevron-right submenu-toggle-icon"></i>
+  </a>
+  <ul class="submenu">
+    <li class="<%= currentRoute.startsWith('/product') && !currentRoute.startsWith('/product/create') ? 'active' : '' %>">
+      <a href="/product"><i class="fas fa-list"></i> List Products</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/product/create') ? 'active' : '' %>">
+      <a href="/product/create"><i class="fas fa-plus-square"></i> Add Product</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/industry') ? 'active' : '' %>">
+      <a href="/industry"><i class="fas fa-industry"></i> Industry</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/units') ? 'active' : '' %>">
+      <a href="/units"><i class="fas fa-ruler-combined"></i> Units</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/brands') ? 'active' : '' %>">
+      <a href="/brands"><i class="fas fa-copyright"></i> Brands</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/attribute-type') ? 'active' : '' %>">
+      <a href="/attribute-type"><i class="fas fa-cogs"></i> Attribute Type</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/attribute-value') ? 'active' : '' %>">
+      <a href="/attribute-value"><i class="fas fa-sliders-h"></i> Attribute Value</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/subcategory') ? 'active' : '' %>">
+      <a href="/subcategory"><i class="fas fa-list-alt"></i> SubCategory</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/category') ? 'active' : '' %>">
+      <a href="/category"><i class="fas fa-th-large"></i> Category</a>
+    </li>
+  </ul>
+</li>
 
-  <li class="<%= currentRoute.startsWith('/product') ? 'active' : '' %>">
-    <a href="/product"><i class="fas fa-box"></i> <span>Product Management</span></a>
-  </li>
 
   <li class="<%= currentRoute.startsWith('/manufacture') ? 'active' : '' %>">
     <a href="/manufacture"><i class="fas fa-box"></i> <span>Manufacture</span></a>
@@ -63,49 +107,36 @@
   <li class="<%= currentRoute.startsWith('/partner') ? 'active' : '' %>">
     <a href="/partner"><i class="fas fa-user"></i> <span>Partners</span></a>
   </li>
+<li class="has-sub <%= (
+  currentRoute.startsWith('/state') ||
+  currentRoute.startsWith('/city') ||
+  currentRoute.startsWith('/hashtag') ||
+  currentRoute.startsWith('/banner') ||
+  currentRoute.startsWith('/coupon')
+) ? 'active' : '' %>">
+  <a href="javascript:void(0)">
+    <span><i class="fas fa-cogs"></i>&nbsp;Global Setting</span>
+    <i class="fas fa-chevron-right submenu-toggle-icon"></i>
+  </a>
+  <ul class="submenu">
+    <li class="<%= currentRoute.startsWith('/banner') ? 'active' : '' %>">
+      <a href="/banner"><i class="fas fa-image"></i> Banners</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/coupon') ? 'active' : '' %>">
+      <a href="/coupon"><i class="fas fa-tags"></i> Coupons</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/state') ? 'active' : '' %>">
+      <a href="/state"><i class="fas fa-flag"></i> State</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/city') ? 'active' : '' %>">
+      <a href="/city"><i class="fas fa-city"></i> City</a>
+    </li>
+    <li class="<%= currentRoute.startsWith('/hashtag') ? 'active' : '' %>">
+      <a href="/hashtag"><i class="fas fa-hashtag"></i> HashTag</a>
+    </li>
+  </ul>
+</li>
 
-  <!-- Common Setting Dropdown -->
-  <li class="has-sub <%= currentRoute.startsWith('/state') || currentRoute.startsWith('/city') || currentRoute.startsWith('/units') || currentRoute.startsWith('/brands') || currentRoute.startsWith('/subcategory') || currentRoute.startsWith('/category') || currentRoute.startsWith('/industry') || currentRoute.startsWith('/hashtag') || currentRoute.startsWith('/banner') ? 'active' : '' || currentRoute.startsWith('/coupon') ? 'active' : '' || currentRoute.startsWith('/attribute-type') ? 'active' : '' || currentRoute.startsWith('/attribute-value') ? 'active' : '' %>">
-    <a href="javascript:void(0)"><span> <i class="fas fa-cogs"></i>&nbsp;Global Setting</span>  <i class="fas fa-chevron-down submenu-toggle-icon"></i></a>
-    <ul class="submenu">
-      <li class="<%= currentRoute.startsWith('/banner') ? 'active' : '' %>">
-        <a href="/banner"><i class="fa-solid fa-image"></i> Banners </a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/coupon') ? 'active' : '' %>">
-        <a href="/coupon"><i class="fa fa-percent" aria-hidden="true"></i> Coupons </a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/industry') ? 'active' : '' %>">
-        <a href="/industry"><i class="fas fa-industry"></i> Industry</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/units') ? 'active' : '' %>">
-        <a href="/units"><i class="fas fa-balance-scale"></i> Units</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/brands') ? 'active' : '' %>">
-        <a href="/brands"><i class="fas fa-tags"></i>  Brands</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/attribute-type') ? 'active' : '' %>">
-        <a href="/attribute-type"><i class="fas fa-tags"></i>  Attribute Type</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/attribute-value') ? 'active' : '' %>">
-        <a href="/attribute-value"><i class="fas fa-tags"></i>  Attribute Value</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/subcategory') ? 'active' : '' %>">
-        <a href="/subcategory"><i class="fas fa-list-alt"></i> SubCategory</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/category') ? 'active' : '' %>">
-        <a href="/category"><i class="fas fa-th-large"></i> Category</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/state') ? 'active' : '' %>">
-        <a href="/state"><i class="fas fa-flag"></i> State</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/city') ? 'active' : '' %>">
-        <a href="/city"><i class="fas fa-city"></i> City</a>
-      </li>
-      <li class="<%= currentRoute.startsWith('/hashtag') ? 'active' : '' %>">
-        <a href="/hashtag"><i class="fas fa-hashtag"></i> HashTag</a>
-      </li>
-    </ul>
-  </li>
 </ul>
 
 </div>
@@ -117,7 +148,7 @@
         
         <div class="flex items-center gap-4">
           <span class="toggle-btn cursor-pointer text-2xl" onclick="toggleSidebar()">☰</span>
-          <h1 class="gradient-text">Zarkha Super Admin</h1>
+          <!-- <h1 class="gradient-text">Zarkha Super Admin</h1> -->
         </div>
         
         <div class="profile relative cursor-pointer" onclick="toggleDropdown()">
